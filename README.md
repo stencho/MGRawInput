@@ -1,3 +1,3 @@
 # MGRawInput
 
-RawInput handler library and testing program
+MonoGame RawInput handler library and testing program
