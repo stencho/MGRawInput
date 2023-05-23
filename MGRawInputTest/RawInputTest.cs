@@ -31,8 +31,6 @@ namespace MGRawInputTest {
         protected override void LoadContent() {
             Drawing.load(GraphicsDevice, graphics, Content);
             SDF.load(Content);
-
-            // TODO: use this.Content to load your game content here
         }
 
         protected override void Update(GameTime gameTime) {
@@ -53,8 +51,13 @@ namespace MGRawInputTest {
             SDF.draw_centered(Drawing.sdf_circle, Vector2.One * 20f, Vector2.One * 130f, Color.White);
 
             Drawing.fill_circle(Vector2.One * 250f, 50f, Color.Pink);
-            Drawing.circle(Vector2.One * 250f, 50f, 10f, Color.Red);
+            Drawing.circle(Vector2.One * 250f, 50f, 12.25f, Color.Red);
+
             Drawing.line_rounded_ends(Vector2.One * 150f, Vector2.One * 300f, Color.HotPink, 10f);
+
+            SDF.draw(Drawing.sdf_circle, Vector2.One * 129f, Vector2.One * 100f, Color.MonoGameOrange, Color.HotPink, 0.75f, 0.25f, 0.5f, true);
+            SDF.draw(Drawing.sdf_circle, Vector2.One * 169f, Vector2.One * 100f, Color.Green, Color.Red, 0.75f, 0.25f, 0.5f, false);
+
             Drawing.poly(Color.Red, 4f, true,
                 Vector2.One * 50f, 
                 (Vector2.One * 50f) + (Vector2.UnitY * 150f), 

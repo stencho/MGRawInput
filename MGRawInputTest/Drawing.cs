@@ -66,7 +66,8 @@ namespace MGRawInputTest {
 
         static void begin() {
             if (!sb_drawing) {
-                sb.Begin();
+                //sb.Begin();
+                sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, null, null, null, null);
                 sb_drawing = true;
             }
         }

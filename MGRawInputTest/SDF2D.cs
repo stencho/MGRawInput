@@ -57,10 +57,12 @@ namespace MGRawInputTest {
             var tex_size = new Vector2(sdf.Bounds.Size.X, sdf.Bounds.Size.Y);
 
             Drawing.end();
+            Drawing.graphics_device.BlendState = BlendState.AlphaBlend;
+            Drawing.graphics_device.DepthStencilState = DepthStencilState.Default;            
 
-            Drawing.sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap, null, null, sdf_effect, null);
+            Drawing.sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap, DepthStencilState.Default, null, sdf_effect, null);
             Drawing.sb.Draw(sdf, new Rectangle((int)position.X, (int)position.Y, (int)scale.X, (int)scale.Y), null, Color.White, 0f,
-                Vector2.Zero, SpriteEffects.None, 0f);
+                Vector2.Zero, SpriteEffects.None, 1f);
             Drawing.sb.End();
         }
 
@@ -70,10 +72,10 @@ namespace MGRawInputTest {
             var tex_size = new Vector2(sdf.Bounds.Size.X, sdf.Bounds.Size.Y);
 
             Drawing.end();
-
-            Drawing.sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap, null, null, sdf_effect, null);
+            
+            Drawing.sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap, DepthStencilState.Default, null, sdf_effect, null);
             Drawing.sb.Draw(sdf, new Rectangle((int)position.X, (int)position.Y, (int)scale.X, (int)scale.Y), null, Color.White, 0f,
-                (Vector2.One * 0.5f) * tex_size, SpriteEffects.None, 0f);
+                (Vector2.One * 0.5f) * tex_size, SpriteEffects.None, 1f);
             Drawing.sb.End();
         }
     }
