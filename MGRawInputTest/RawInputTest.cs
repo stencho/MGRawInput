@@ -1,24 +1,30 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Text;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace MGRawInputTest {
     public class RawInputTest : Game {
-        private GraphicsDeviceManager graphics;
+        GraphicsDeviceManager graphics;
+        FPSCounter fps;
 
         public RawInputTest() {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
+            this.IsFixedTimeStep = false;            
+            graphics.SynchronizeWithVerticalRetrace = true;
+            
             graphics.PreferredBackBufferWidth = 500;
             graphics.PreferredBackBufferHeight = 500;
             graphics.ApplyChanges();
         }
 
         protected override void Initialize() {
-            // TODO: Add your initialization logic here
-
+            fps = new FPSCounter();
             base.Initialize();
         }
 
@@ -33,8 +39,8 @@ namespace MGRawInputTest {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
 
+            fps.update(gameTime);
             base.Update(gameTime);
         }
 
@@ -57,7 +63,7 @@ namespace MGRawInputTest {
                 (Vector2.One * 50f) + (Vector2.UnitY * 150f) + (Vector2.UnitX * 150f) + (Vector2.UnitY * 150f) + (Vector2.UnitX * 250f)
                 );
 
-            Drawing.text_shadow("test haha", Vector2.UnitX * 100 + (Vector2.UnitY * 25), Color.White);
+            Drawing.text_shadow($"{fps.frame_rate} FPS", Vector2.UnitX * 100 + (Vector2.UnitY * 25), Color.White);
 
             Drawing.end();
             base.Draw(gameTime);
