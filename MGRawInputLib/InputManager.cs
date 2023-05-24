@@ -29,6 +29,10 @@ namespace MGRawInputLib {
         public int scroll_value { get; private set; }
         int scroll_value_previous;
 
+        public int scroll_delta => _scroll_delta;
+        int _scroll_delta = 0;
+        int scroll_delta_last_frame = 0;
+
         KeyboardState keyboard_state; KeyboardState keyboard_state_previous;
 
         MouseState mouse_state; MouseState mouse_state_previous;
@@ -59,9 +63,12 @@ namespace MGRawInputLib {
             
             mouse_position = mouse_state.Position.ToVector2();
             mouse_delta_integer = (mouse_state.Position - mouse_state_previous.Position).ToVector2();
+            
             scroll_value_previous = scroll_value;
             scroll_value = mouse_state.ScrollWheelValue;
-            
+
+            scroll_delta_last_frame = _scroll_delta;
+            _scroll_delta = (scroll_value - scroll_value_previous);
         }
 
         public bool is_pressed(Keys key) {
@@ -83,9 +90,9 @@ namespace MGRawInputLib {
                 case MouseButtons.X2:
                     return mouse_state.XButton2 == ButtonState.Pressed;
                 case MouseButtons.ScrollUp:
-                    return (scroll_value - scroll_value_previous) > 0;
+                    return _scroll_delta > 0;
                 case MouseButtons.ScrollDown:
-                    return (scroll_value - scroll_value_previous) < 0;
+                    return _scroll_delta < 0;
                 default: return false;
             }
         }
@@ -102,9 +109,9 @@ namespace MGRawInputLib {
                 case MouseButtons.X2:
                     return mouse_state_previous.XButton2 == ButtonState.Pressed;
                 case MouseButtons.ScrollUp:
-                    return mouse_state_previous.ScrollWheelValue > 0;
+                    return scroll_delta_last_frame > 0;
                 case MouseButtons.ScrollDown:
-                    return mouse_state_previous.ScrollWheelValue < 0;
+                    return scroll_delta_last_frame < 0;
                 default: return false;
             }
         }
