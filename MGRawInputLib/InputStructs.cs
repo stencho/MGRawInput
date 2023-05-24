@@ -6,6 +6,6 @@ using System.Threading.Tasks;
 
 namespace MGRawInputLib {
     public static class InputStructs {
-        public enum MouseButtons { Left, Right, Middle, X1, X2 }
+        public enum MouseButtons { Left, Right, Middle, X1, X2, ScrollUp, ScrollDown }
     }
 }

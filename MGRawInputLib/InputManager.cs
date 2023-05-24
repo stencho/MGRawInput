@@ -26,6 +26,8 @@ namespace MGRawInputLib {
     public class InputManager {
         public Vector2 mouse_delta_integer { get; private set; }
         public Vector2 mouse_position { get; private set; }
+        public int scroll_value { get; private set; }
+        int scroll_value_previous;
 
         KeyboardState keyboard_state; KeyboardState keyboard_state_previous;
 
@@ -54,9 +56,12 @@ namespace MGRawInputLib {
 
             gamepad_four_state_previous = gamepad_four_state;
             gamepad_four_state = InputPolling.gamepad_four_state;
-
+            
             mouse_position = mouse_state.Position.ToVector2();
             mouse_delta_integer = (mouse_state.Position - mouse_state_previous.Position).ToVector2();
+            scroll_value_previous = scroll_value;
+            scroll_value = mouse_state.ScrollWheelValue;
+            
         }
 
         public bool is_pressed(Keys key) {
@@ -77,6 +82,10 @@ namespace MGRawInputLib {
                     return mouse_state.XButton1 == ButtonState.Pressed;
                 case MouseButtons.X2:
                     return mouse_state.XButton2 == ButtonState.Pressed;
+                case MouseButtons.ScrollUp:
+                    return (scroll_value - scroll_value_previous) > 0;
+                case MouseButtons.ScrollDown:
+                    return (scroll_value - scroll_value_previous) < 0;
                 default: return false;
             }
         }
@@ -92,6 +101,10 @@ namespace MGRawInputLib {
                     return mouse_state_previous.XButton1 == ButtonState.Pressed;
                 case MouseButtons.X2:
                     return mouse_state_previous.XButton2 == ButtonState.Pressed;
+                case MouseButtons.ScrollUp:
+                    return mouse_state_previous.ScrollWheelValue > 0;
+                case MouseButtons.ScrollDown:
+                    return mouse_state_previous.ScrollWheelValue < 0;
                 default: return false;
             }
         }
