@@ -118,7 +118,7 @@ namespace MGRawInputTest {
 
 
             for (var i = 0; i < points.Length; i++) {
-                fill_circle(points[i], thickness, color);
+                //fill_circle(points[i], thickness, color);
             }            
         }
 
@@ -127,6 +127,10 @@ namespace MGRawInputTest {
             poly(color, thickness, true, A, B, C);
         }
         
+        public static void rect(Vector2 min, float size_x, float size_y, Color color, float thickness) {
+            rect(min, min + new Vector2(size_x, size_y), color, thickness);
+        }
+
         public static void rect(Vector2 min, Vector2 max, Color color, float thickness) {
             begin();
 
@@ -149,6 +153,11 @@ namespace MGRawInputTest {
             //right
             line(min + w, min + h + w, color, thickness);
         }
+
+        public static void fill_rect(Vector2 min, float size_x, float size_y, Color color) {
+            fill_rect(min, min + new Vector2(size_x, size_y), color);
+        }
+
         public static void fill_rect(Vector2 min, Vector2 max, Color color) {
             begin();
             sb.Draw(OnePXWhite, min, null, color, 0f, Vector2.Zero, max-min, SpriteEffects.None, 0f);
@@ -175,11 +184,14 @@ namespace MGRawInputTest {
 
         public static void text(string text, Vector2 position, Color color) {
             begin();
-            sb.DrawString(fnt_profont, text, position, color);
+            sb.DrawString(fnt_profont, text, position, color);            
         }
         public static void text_shadow(string text, Vector2 position, Color color) {
             Drawing.text(text, position + (Vector2.One), Color.Black);
             Drawing.text(text, position, color);
+        }
+        public static Vector2 measure_string_profont(string text) {
+            return fnt_profont.MeasureString(text);
         }
     }
 }
