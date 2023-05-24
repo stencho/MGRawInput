@@ -67,7 +67,7 @@ namespace MGRawInputTest {
         static void begin() {
             if (!sb_drawing) {
                 //sb.Begin();
-                sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, null, null, null, null);
+                sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
                 sb_drawing = true;
             }
         }
@@ -181,6 +181,20 @@ namespace MGRawInputTest {
             begin();
             sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), Color.White);
         }
+        public static void image(Texture2D image, Vector2 position, Vector2 size, Color tint) {
+            begin();
+            sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), tint);
+        }
+
+        public static void image(Texture2D image, Vector2 position, Vector2 size, float rotation) {
+            begin();
+            sb.Draw(image, new Rectangle((position + (image.Bounds.Size.ToVector2() / 2f)).ToPoint(), size.ToPoint()), null, Color.White, MathHelper.ToRadians(rotation), image.Bounds.Size.ToVector2() / 2f, SpriteEffects.None, 0f);
+        }
+        public static void image(Texture2D image, Vector2 position, Vector2 size, Color tint, float rotation) {
+            begin();
+            sb.Draw(image, new Rectangle((position + (image.Bounds.Size.ToVector2() / 2f)).ToPoint(), size.ToPoint()), null, tint, MathHelper.ToRadians(rotation), image.Bounds.Size.ToVector2() / 2f, SpriteEffects.None, 0f);
+        }
+
 
         public static void text(string text, Vector2 position, Color color) {
             begin();

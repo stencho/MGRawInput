@@ -24,6 +24,8 @@ namespace MGRawInputTest {
 
         Vector2 resolution = new Vector2(800,200);
 
+        Texture2D tx_key_arrow;
+
         Texture2D tx_mouse_base;
         Texture2D tx_mouse_left;
         Texture2D tx_mouse_right;
@@ -33,6 +35,11 @@ namespace MGRawInputTest {
         Texture2D tx_mouse_xbutton1;
         Texture2D tx_mouse_xbutton2;
 
+        UIButton close_button;
+        UIButton keyboard_display;
+        UIButton mouse_display;
+        UIButton gamepad_display;
+
         public RawInputTest() {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
@@ -41,6 +48,8 @@ namespace MGRawInputTest {
             this.IsFixedTimeStep = false;
             this.InactiveSleepTime = System.TimeSpan.Zero;
             this.TargetElapsedTime = System.TimeSpan.FromMilliseconds(1000.0 / 120.0);
+
+            Window.IsBorderless = true;
 
             graphics.SynchronizeWithVerticalRetrace = true;
             
@@ -52,8 +61,10 @@ namespace MGRawInputTest {
 
         protected override void Initialize() {
             InputPolling.initialize();
+
             input = new InputManager();
             input_draw = new InputManager();
+
             fps = new FPSCounter();
             this.Disposed += RawInputTest_Disposed;
             base.Initialize();
@@ -66,6 +77,11 @@ namespace MGRawInputTest {
         protected override void LoadContent() {
             Drawing.load(GraphicsDevice, graphics, Content);
 
+            var tl = Drawing.measure_string_profont("exit");
+            close_button = new UIButton("exit", resolution.X_only() - tl.X_only() - (Vector2.UnitX * 6f));
+
+            tx_key_arrow = Content.Load<Texture2D>("key_arrow");
+            
             tx_mouse_base = Content.Load<Texture2D>("mouse/mouse_base");
             tx_mouse_left = Content.Load<Texture2D>("mouse/left_button");
             tx_mouse_right = Content.Load<Texture2D>("mouse/right_button");
@@ -80,9 +96,44 @@ namespace MGRawInputTest {
 
         protected override void Update(GameTime gameTime) {
             input.update();
+
+            close_button.update();
+
             fps.update(gameTime);
             base.Update(gameTime);
-        }       
+        }
+
+        protected override void Draw(GameTime gameTime) {
+            input_draw.update();
+
+            GraphicsDevice.Clear(Color.Black);
+
+            string FPS_text = $"~{InputPolling.frame_rate} Hz poll/{fps.frame_rate} FPS draw";
+            float FPS_text_width = Drawing.measure_string_profont(FPS_text).X;
+            Drawing.text(FPS_text, (Vector2.UnitY * 3) + (Vector2.UnitX * resolution.X) - (Vector2.UnitX * (FPS_text_width + 35)), Color.White);
+
+            close_button.draw();
+
+            Drawing.rect(
+                Vector2.UnitX,
+                (Vector2.UnitY * top_bar_height) + (Vector2.UnitX * resolution.X),
+                Color.White, 1f);
+            Drawing.rect(
+                Vector2.UnitX,
+                resolution - Vector2.UnitY,
+                Color.White, 1f);
+
+
+            draw_keyboard();
+            draw_mouse();
+            //Drawing.text($"mouse delta integer [{input.mouse_delta_integer}]", Vector2.One * 50, Color.White);
+
+            Drawing.fill_circle(input.mouse_position, 4f, Color.HotPink);
+
+            Drawing.end();
+            base.Draw(gameTime);
+        }
+
 
 
         static float top_bar_height = 16f;
@@ -218,7 +269,7 @@ namespace MGRawInputTest {
             var n = 0; var c = 0; var g = 0;
 
             //Top row
-            draw_input_key(Keys.Escape, "esc", top_row_top_left); c++;
+            draw_input_key(Keys.Escape,           "esc",          top_row_top_left); c++;
             n++;
             draw_input_key(Keys.F1,                               top_row_top_left + (f_key_gap * n) + (key_width * c)); c++; g++;
             draw_input_key(Keys.F2,                               top_row_top_left + (f_key_gap * n) + (key_gap_x * g) + (key_width * c)); c++; g++;
@@ -283,12 +334,13 @@ namespace MGRawInputTest {
             draw_input_key(Keys.OemOpenBrackets,  "{", "[",       tab_top_right + (key_gap_x * n) + (key_width * (n-1))); n++;
             draw_input_key(Keys.OemCloseBrackets, "}", "]",       tab_top_right + (key_gap_x * n) + (key_width * (n-1))); n++;
             draw_input_key(Keys.OemPipe,          "|", "\\",      tab_top_right + (key_gap_x * n) + (key_width * (n-1)), backslash_size);
-            
+
+            //caps lock enabled bar
+            if (InputPolling.caps_lock) Drawing.line(fourth_row_top_left + Vector2.UnitY, fourth_row_top_left + Vector2.UnitY + caps_size.X_only(), Color.HotPink, 3f);
+
             //fourth row
             n = 0;                                
             draw_input_key(Keys.CapsLock,         "caps", "lock", fourth_row_top_left, caps_size, align_text.left); n++;
-            if (InputPolling.caps_lock)
-                Drawing.line(fourth_row_top_left + Vector2.One, fourth_row_top_left + Vector2.One + caps_size.X_only(), Color.HotPink, 3f);
             draw_input_key(Keys.A,                                caps_top_right + key_gap_x); n++;
             draw_input_key(Keys.S,                                caps_top_right + (key_gap_x * n) + (key_width * (n-1))); n++;
             draw_input_key(Keys.D,                                caps_top_right + (key_gap_x * n) + (key_width * (n-1))); n++;
@@ -327,22 +379,35 @@ namespace MGRawInputTest {
             draw_input_key(Keys.Apps,             "mnu",          bottom_row + ctrl_size.X_only() + alt_size.X_only() + space_size.X_only() + alt_size.X_only() + key_width + (key_gap_x * n)); n++;
             draw_input_key(Keys.RightControl,     "ctrl",         bottom_row + ctrl_size.X_only() + alt_size.X_only() + space_size.X_only() + alt_size.X_only() + key_width + key_width + (key_gap_x * n), ctrl_size, align_text.right); n++;
 
+
             //arrow keys
             draw_input_key(Keys.Up,               "",             up_arrow);
             draw_input_key(Keys.Down,             "",             down_arrow);
             draw_input_key(Keys.Left,             "",             left_arrow);
             draw_input_key(Keys.Right,            "",             right_arrow);
 
-            //arrow glyphs
-            Drawing.line(up_arrow + half_key_size,    (up_arrow + half_key_size) - (half_key_size.Y_only() / 2f), Color.White, 1f);
-            Drawing.line(down_arrow + half_key_size,  (down_arrow + half_key_size) + (half_key_size.Y_only() / 2f), Color.White, 1f);
-            Drawing.line(left_arrow + half_key_size,  (left_arrow + half_key_size) - (half_key_size.X_only() / 2f), Color.White, 1f);
-            Drawing.line(right_arrow + half_key_size, (right_arrow + half_key_size) + (half_key_size.X_only() / 2f), Color.White, 1f);
+            //arrow key glyphs
+            Drawing.image(tx_key_arrow, 
+                up_arrow, base_key_size, 
+                input.is_pressed(Keys.Up) ? Color.Black : Color.White);
+            Drawing.image(tx_key_arrow, 
+                down_arrow, base_key_size, 
+                input.is_pressed(Keys.Down) ? Color.Black : Color.White, 
+                180f);
+            Drawing.image(tx_key_arrow, 
+                left_arrow + (Vector2.UnitY * 3f), base_key_size,
+                input.is_pressed(Keys.Left) ? Color.Black : Color.White,
+               -90f);
+            Drawing.image(tx_key_arrow, 
+                right_arrow + (Vector2.UnitY * 3f), base_key_size,
+                input.is_pressed(Keys.Right) ? Color.Black : Color.White,
+                90f);
+
+            //num lock enabled bar
+            if (InputPolling.num_lock) Drawing.line(numpad_section_top_left + Vector2.One, numpad_section_top_left + Vector2.One + base_key_size.X_only(), Color.HotPink, 3f);
 
             //numpad
             n = 0;
-            if (InputPolling.num_lock)
-                Drawing.line(numpad_section_top_left + Vector2.One, numpad_section_top_left + Vector2.One + base_key_size.X_only(), Color.HotPink, 3f);
             draw_input_key(Keys.NumLock,          "num", "lck",   numpad_section_top_left); n++;
             draw_input_key(Keys.Divide,           "/", "",        numpad_section_top_left + (key_gap_x * n) + (key_width * n)); n++;
             draw_input_key(Keys.Multiply,         "*", "",        numpad_section_top_left + (key_gap_x * n) + (key_width * n)); n++;
@@ -371,53 +436,23 @@ namespace MGRawInputTest {
         void draw_mouse() {
             Drawing.image(tx_mouse_base, mouse_position, mouse_size);
 
-            if (input.is_pressed(InputStructs.MouseButtons.Left)) {
-                Drawing.image(tx_mouse_left, mouse_position, mouse_size);
-            }
-            if (input.is_pressed(InputStructs.MouseButtons.Right)) {
-                Drawing.image(tx_mouse_right, mouse_position, mouse_size);
-            }
-            if (input.is_pressed(InputStructs.MouseButtons.Middle)) {
-                Drawing.image(tx_mouse_middle, mouse_position, mouse_size);
-            }
+            if (input.is_pressed(InputStructs.MouseButtons.Left)) 
+                Drawing.image(tx_mouse_left, mouse_position, mouse_size);            
+            if (input.is_pressed(InputStructs.MouseButtons.Right)) 
+                Drawing.image(tx_mouse_right, mouse_position, mouse_size);            
+            if (input.is_pressed(InputStructs.MouseButtons.Middle)) 
+                Drawing.image(tx_mouse_middle, mouse_position, mouse_size);            
 
-            if (input.is_pressed(InputStructs.MouseButtons.ScrollUp)) {
-                Drawing.image(tx_mouse_scroll_up, mouse_position, mouse_size);
-            }
-            if (input.is_pressed(InputStructs.MouseButtons.ScrollDown)) {
-                Drawing.image(tx_mouse_scroll_down, mouse_position, mouse_size);
-            }
+            if (input.is_pressed(InputStructs.MouseButtons.ScrollUp)) 
+                Drawing.image(tx_mouse_scroll_up, mouse_position, mouse_size);            
+            if (input.is_pressed(InputStructs.MouseButtons.ScrollDown)) 
+                Drawing.image(tx_mouse_scroll_down, mouse_position, mouse_size);            
 
-            if (input.is_pressed(InputStructs.MouseButtons.X1)) {
-                Drawing.image(tx_mouse_xbutton1, mouse_position, mouse_size);
-            }
-            if (input.is_pressed(InputStructs.MouseButtons.X2)) {
-                Drawing.image(tx_mouse_xbutton2, mouse_position, mouse_size);
-            }
+            if (input.is_pressed(InputStructs.MouseButtons.X1)) 
+                Drawing.image(tx_mouse_xbutton1, mouse_position, mouse_size);            
+            if (input.is_pressed(InputStructs.MouseButtons.X2)) 
+                Drawing.image(tx_mouse_xbutton2, mouse_position, mouse_size);            
         }
 
-        protected override void Draw(GameTime gameTime) {
-            input_draw.update();
-
-            GraphicsDevice.Clear(Color.Black);
-
-            string FPS_text = $"{fps.frame_rate} FPS/~{InputPolling.frame_rate} Hz";
-            float FPS_text_width = Drawing.measure_string_profont(FPS_text).X;
-            Drawing.text(FPS_text, (Vector2.UnitY * 2) + (Vector2.UnitX * resolution.X) - (Vector2.UnitX * (FPS_text_width + 3)), Color.White);
-
-            Drawing.line(
-                Vector2.UnitY * top_bar_height, 
-                (Vector2.UnitY * top_bar_height) + (Vector2.UnitX * resolution.X),
-                Color.White, 1f);
-
-            draw_keyboard();
-            draw_mouse();
-            //Drawing.text($"mouse delta integer [{input.mouse_delta_integer}]", Vector2.One * 50, Color.White);
-
-            Drawing.fill_circle(input.mouse_position, 4f, Color.HotPink);
-
-            Drawing.end();
-            base.Draw(gameTime);
-        }
     }
 }
