@@ -13,6 +13,9 @@ namespace MGRawInputLib {
         public static void initialize() { control_update_thread.Start(); }
         public static void kill() { run_thread = false; }
 
+        public static bool num_lock => keyboard_state.NumLock;
+        public static bool caps_lock => keyboard_state.CapsLock;
+
 
         public static KeyboardState keyboard_state {get; private set; }
         public static MouseState mouse_state { get; private set; }
