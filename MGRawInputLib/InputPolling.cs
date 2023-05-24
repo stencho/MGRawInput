@@ -41,7 +41,7 @@ namespace MGRawInputLib {
         static TimeSpan ts;
 
         static volatile bool run_thread = true;
-        public static void update() {
+        static void update() {
             while (run_thread) {
                 start_dt = DateTime.Now;
 
