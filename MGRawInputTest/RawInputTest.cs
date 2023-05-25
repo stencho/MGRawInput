@@ -19,10 +19,10 @@ namespace MGRawInputTest {
 
         FPSCounter fps;
 
-        InputManager input;
-        InputManager input_draw;
+        public static InputManager input;
+        public static InputManager input_draw;
 
-        Vector2 resolution = new Vector2(800,200);
+        Vector2 resolution = new Vector2(850,200);
 
         Texture2D tx_key_arrow;
 
@@ -142,13 +142,9 @@ namespace MGRawInputTest {
         Vector2 client_bounds_bottom_right => client_bounds_top_left + (resolution - client_bounds_top_left);
         Vector2 client_bounds_size => (resolution - client_bounds_top_left);
 
-        enum align_text {
-            left,right, center
-        }
+        enum align_text { left, right, center }
         
         void draw_input_key(Keys key, Vector2 position) { draw_input_key(key, "", key.ToString(), position, base_key_size, align_text.center); }
-        void draw_input_key(Keys key, Vector2 position, Vector2 size) { draw_input_key(key, "", key.ToString(), position, size, align_text.center); }
-        void draw_input_key(Keys key, Vector2 position, Vector2 size, align_text alignment) { draw_input_key(key, "", key.ToString(), position, size, alignment); }
         void draw_input_key(Keys key, string key_string, Vector2 position) { draw_input_key(key, "", key_string, position, base_key_size, align_text.center); }
         void draw_input_key(Keys key, string key_string, Vector2 position, Vector2 size) { draw_input_key(key, "", key_string, position, size, align_text.center); }
         void draw_input_key(Keys key, string key_string, Vector2 position, Vector2 size, align_text alignment) { draw_input_key(key, "", key_string, position, size, alignment); }
@@ -183,8 +179,8 @@ namespace MGRawInputTest {
                     break;
 
                 case align_text.center:
-                    text_pos_top = position + (size / 2f).X_only() - (Drawing.measure_string_profont(key_string_top).X_only()/2f) + (Vector2.UnitY * 3) + (Vector2.UnitX);
-                    text_pos_bottom = (position + (size - (size.X_only() / 2f))) - (ksb.X_only() / 2f) - (ksb.Y_only()) + (Vector2.UnitX);
+                    text_pos_top = position + (size / 2f).X_only() - (Drawing.measure_string_profont(key_string_top).X_only()/2f) + (Vector2.UnitY * 3) ;
+                    text_pos_bottom = (position + (size - (size.X_only() / 2f))) - (ksb.X_only() / 2f) - (ksb.Y_only());
                     break;
 
                 case align_text.right:
@@ -210,7 +206,7 @@ namespace MGRawInputTest {
         //SIZES
         Vector2 top_row_height => Vector2.UnitY * (base_key_size.Y + 6);
 
-        Vector2 base_key_size => new Vector2(28, 26);
+        Vector2 base_key_size => new Vector2(30, 26);
         Vector2 half_key_size => (base_key_size / 2f);
         Vector2 key_width => base_key_size.X_only();
         Vector2 key_height => base_key_size.Y_only();
@@ -224,7 +220,7 @@ namespace MGRawInputTest {
         Vector2 enter_size => base_key_size + (key_width * 1.2f);
         Vector2 right_shift_size => base_key_size + (key_width * 1.77f);
 
-        Vector2 ctrl_size => base_key_size + (key_width * .54f);
+        Vector2 ctrl_size => base_key_size + (key_width * .47f);
         Vector2 alt_size => base_key_size + (key_width * .2f);
         Vector2 space_size => base_key_size + (key_width * 6);
 
@@ -369,15 +365,16 @@ namespace MGRawInputTest {
             draw_input_key(Keys.OemQuestion,      "?", "/",       shift_top_right + (key_gap_x * n) + (key_width * (n - 1))); n++;
             draw_input_key(Keys.RightShift,       "shift",        shift_top_right + (key_gap_x * n) + (key_width * (n - 1)), right_shift_size, align_text.right); n++;
 
+            n = 0;
             //bottom row
             draw_input_key(Keys.LeftControl,      "ctrl",         bottom_row, ctrl_size, align_text.left); n++;
             draw_input_key(Keys.LeftWindows,      "win",          bottom_row + ctrl_size.X_only() + key_gap_x); n++;
-            draw_input_key(Keys.LeftAlt,          "alt",          bottom_row + ctrl_size.X_only() + (key_gap_x * n), alt_size); n++;
-            draw_input_key(Keys.Space,            "",             bottom_row + ctrl_size.X_only() + alt_size.X_only() + (key_gap_x * n), space_size); n++;
-            draw_input_key(Keys.RightAlt,         "alt",          bottom_row + ctrl_size.X_only() + alt_size.X_only() + space_size.X_only() + (key_gap_x * n), alt_size); n++;
-            draw_input_key(Keys.RightWindows,     "win",          bottom_row + ctrl_size.X_only() + alt_size.X_only() + space_size.X_only() + alt_size.X_only() + (key_gap_x * n)); n++;
-            draw_input_key(Keys.Apps,             "mnu",          bottom_row + ctrl_size.X_only() + alt_size.X_only() + space_size.X_only() + alt_size.X_only() + key_width + (key_gap_x * n)); n++;
-            draw_input_key(Keys.RightControl,     "ctrl",         bottom_row + ctrl_size.X_only() + alt_size.X_only() + space_size.X_only() + alt_size.X_only() + key_width + key_width + (key_gap_x * n), ctrl_size, align_text.right); n++;
+            draw_input_key(Keys.LeftAlt,          "alt",          bottom_row + ctrl_size.X_only() + key_width + (key_gap_x * n), alt_size); n++;
+            draw_input_key(Keys.Space,            "",             bottom_row + ctrl_size.X_only() + key_width + alt_size.X_only() + (key_gap_x * n), space_size); n++;
+            draw_input_key(Keys.RightAlt,         "alt",          bottom_row + ctrl_size.X_only() + key_width + alt_size.X_only() + space_size.X_only() + (key_gap_x * n), alt_size); n++;
+            draw_input_key(Keys.RightWindows,     "win",          bottom_row + ctrl_size.X_only() + key_width + alt_size.X_only() + space_size.X_only() + alt_size.X_only() + (key_gap_x * n)); n++;
+            draw_input_key(Keys.Apps,             "menu",         bottom_row + ctrl_size.X_only() + key_width + alt_size.X_only() + space_size.X_only() + alt_size.X_only() + key_width + (key_gap_x * n)); n++;
+            draw_input_key(Keys.RightControl,     "ctrl",         bottom_row + ctrl_size.X_only() + key_width + alt_size.X_only() + space_size.X_only() + alt_size.X_only() + key_width + key_width + (key_gap_x * n), ctrl_size, align_text.right); n++;
 
 
             //arrow keys
@@ -391,7 +388,7 @@ namespace MGRawInputTest {
                 up_arrow, base_key_size, 
                 input.is_pressed(Keys.Up) ? Color.Black : Color.White);
             Drawing.image(tx_key_arrow, 
-                down_arrow, base_key_size, 
+                down_arrow + Vector2.UnitX, base_key_size, 
                 input.is_pressed(Keys.Down) ? Color.Black : Color.White, 
                 180f);
             Drawing.image(tx_key_arrow, 
@@ -399,7 +396,7 @@ namespace MGRawInputTest {
                 input.is_pressed(Keys.Left) ? Color.Black : Color.White,
                -90f);
             Drawing.image(tx_key_arrow, 
-                right_arrow + (Vector2.UnitY * 3f), base_key_size,
+                right_arrow + (Vector2.UnitY * 3f) + (Vector2.UnitX * 4f), base_key_size,
                 input.is_pressed(Keys.Right) ? Color.Black : Color.White,
                 90f);
 
@@ -414,16 +411,35 @@ namespace MGRawInputTest {
             draw_input_key(Keys.Subtract,         "-", "",        numpad_section_top_left + (key_gap_x * n) + (key_width * n)); n++;
             n = 0;
             draw_input_key(Keys.NumPad7,          "7", "home",    numpad_section_top_left + (key_height + key_gap_y)); n++;
-            draw_input_key(Keys.NumPad8,          "8", "",        numpad_section_top_left + (key_height + key_gap_y) + (key_gap_x * n) + (key_width * n)); n++;
+            draw_input_key(Keys.NumPad8,          "8", "",        numpad_section_top_left + (key_height + key_gap_y) + (key_gap_x * n) + (key_width * n)); 
+            Drawing.image(tx_key_arrow,
+                numpad_section_top_left + (key_height + key_gap_y) + (key_gap_x * n) + (key_width * n) + (key_height * 0.4f), base_key_size,
+                input.is_pressed(Keys.NumPad8) ? Color.Black : Color.White); 
+            n++;
             draw_input_key(Keys.NumPad9,          "9", "pgup",    numpad_section_top_left + (key_height + key_gap_y) + (key_gap_x * n) + (key_width * n)); n++;
             draw_input_key(Keys.Add,              "+", "",        numpad_section_top_left + (key_height + key_gap_y) + (key_gap_x * n) + (key_width * n), base_key_size + (base_key_size.Y_only() + key_gap_y )); n++;
             n = 0;
-            draw_input_key(Keys.NumPad4,          "4", "",        numpad_section_top_left + ((key_height + key_gap_y) * 2)); n++;
+            draw_input_key(Keys.NumPad4,          "4", "",        numpad_section_top_left + ((key_height + key_gap_y) * 2)); 
+            Drawing.image(tx_key_arrow,
+                numpad_section_top_left + ((key_height + key_gap_y) * 2) + (Vector2.UnitY * 3f) + (key_height * 0.15f) + (key_width * 0.15f), base_key_size,
+                input.is_pressed(Keys.Left) ? Color.Black : Color.White,
+               -90f); 
+            n++;
             draw_input_key(Keys.NumPad5,          "5", "",        numpad_section_top_left + ((key_height + key_gap_y) * 2) + (key_gap_x * n) + (key_width * n)); n++;
-            draw_input_key(Keys.NumPad6,          "6", "",        numpad_section_top_left + ((key_height + key_gap_y) * 2) + (key_gap_x * n) + (key_width * n)); n++;
+            draw_input_key(Keys.NumPad6,          "6", "",        numpad_section_top_left + ((key_height + key_gap_y) * 2) + (key_gap_x * n) + (key_width * n));
+            Drawing.image(tx_key_arrow,
+                numpad_section_top_left + ((key_height + key_gap_y) * 2) + (key_gap_x * n) + (key_width * n) + (Vector2.UnitY * 7f) - (Vector2.UnitX * 3f), base_key_size,
+                input.is_pressed(Keys.Right) ? Color.Black : Color.White,
+                90f); 
+            n++;
             n = 0;
             draw_input_key(Keys.NumPad1,          "1", "end",     numpad_section_top_left + ((key_height + key_gap_y) * 3)); n++;
-            draw_input_key(Keys.NumPad2,          "2", "",        numpad_section_top_left + ((key_height + key_gap_y) * 3) + (key_gap_x * n) + (key_width * n)); n++;
+            draw_input_key(Keys.NumPad2,          "2", "",        numpad_section_top_left + ((key_height + key_gap_y) * 3) + (key_gap_x * n) + (key_width * n));
+            Drawing.image(tx_key_arrow,
+                numpad_section_top_left + ((key_height + key_gap_y) * 3) + (key_gap_x * n) + (key_width * n) + (key_height * 0.15f) + Vector2.UnitX, base_key_size,
+                input.is_pressed(Keys.Down) ? Color.Black : Color.White,
+                180f); 
+            n++;
             draw_input_key(Keys.NumPad3,          "3", "pgdn",    numpad_section_top_left + ((key_height + key_gap_y) * 3) + (key_gap_x * n) + (key_width * n)); n++;
             draw_input_key(Keys.Enter,            "", "",         numpad_section_top_left + ((key_height + key_gap_y) * 3) + (key_gap_x * n) + (key_width * n), base_key_size + (base_key_size.Y_only() + key_gap_y)); n++;
             n = 0;
