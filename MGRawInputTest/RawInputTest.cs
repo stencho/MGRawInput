@@ -80,6 +80,11 @@ namespace MGRawInputTest {
             var tl = Drawing.measure_string_profont("exit");
             close_button = new UIButton("exit", resolution.X_only() - tl.X_only() - (Vector2.UnitX * 6f));
 
+            close_button.click_action = () => {
+                InputPolling.kill();
+                this.Exit();
+            };
+
             tx_key_arrow = Content.Load<Texture2D>("key_arrow");
             
             tx_mouse_base = Content.Load<Texture2D>("mouse/mouse_base");

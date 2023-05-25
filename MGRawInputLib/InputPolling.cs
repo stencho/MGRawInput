@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using static MGRawInputLib.InputStructs;
 
 namespace MGRawInputLib {
     public static class InputPolling {
@@ -41,6 +42,7 @@ namespace MGRawInputLib {
         static TimeSpan ts;
 
         static volatile bool run_thread = true;
+
         static void update() {
             while (run_thread) {
                 start_dt = DateTime.Now;
@@ -68,6 +70,25 @@ namespace MGRawInputLib {
                     _frame_count = 0;
                     _fps_timer -= fps_update_frequency_ms;
                 }
+            }
+        }
+        public static bool is_pressed(Keys key) {
+            return keyboard_state.IsKeyDown(key);
+        }
+        
+        public static bool is_pressed(MouseButtons mouse_button) {
+            switch (mouse_button) {
+                case MouseButtons.Left:
+                    return mouse_state.LeftButton == ButtonState.Pressed;
+                case MouseButtons.Right:
+                    return mouse_state.RightButton == ButtonState.Pressed;
+                case MouseButtons.Middle:
+                    return mouse_state.MiddleButton == ButtonState.Pressed;
+                case MouseButtons.X1:
+                    return mouse_state.XButton1 == ButtonState.Pressed;
+                case MouseButtons.X2:
+                    return mouse_state.XButton2 == ButtonState.Pressed;
+                default: return false;
             }
         }
 
