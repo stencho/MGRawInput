@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 using MGRawInputLib;
+using MGRawInputTest.UIElements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace MGRawInputTest {
+namespace MGRawInputTest
+{
     static class Extensions {
         public static Vector2 X_only(this Vector2 v) => new Vector2(v.X, 0);
         public static Vector2 Y_only(this Vector2 v) => new Vector2(0, v.Y);
@@ -39,6 +41,8 @@ namespace MGRawInputTest {
         UIButton keyboard_display;
         UIButton mouse_display;
         UIButton gamepad_display;
+
+        MouseDeltaUI mouse_delta_display;
 
         public RawInputTest() {
             graphics = new GraphicsDeviceManager(this);
@@ -85,6 +89,9 @@ namespace MGRawInputTest {
                 this.Exit();
             };
 
+            mouse_delta_display = new MouseDeltaUI(
+                mouse_position + (mouse_size/2f) + Vector2.UnitX + (Vector2.UnitY * 5f), Vector2.One * 60f);
+
             tx_key_arrow = Content.Load<Texture2D>("key_arrow");
             
             tx_mouse_base = Content.Load<Texture2D>("mouse/mouse_base");
@@ -103,6 +110,7 @@ namespace MGRawInputTest {
             input.update();
 
             close_button.update();
+            mouse_delta_display.update(input);
 
             fps.update(gameTime);
             base.Update(gameTime);
@@ -118,6 +126,7 @@ namespace MGRawInputTest {
             Drawing.text(FPS_text, (Vector2.UnitY * 3) + (Vector2.UnitX * resolution.X) - (Vector2.UnitX * (FPS_text_width + 35)), Color.White);
 
             close_button.draw();
+            mouse_delta_display.draw();
 
             Drawing.rect(
                 Vector2.UnitX,
@@ -406,7 +415,8 @@ namespace MGRawInputTest {
                 90f);
 
             //num lock enabled bar
-            if (InputPolling.num_lock) Drawing.line(numpad_section_top_left + Vector2.One, numpad_section_top_left + Vector2.One + base_key_size.X_only(), Color.HotPink, 3f);
+            if (InputPolling.num_lock) 
+                Drawing.line(numpad_section_top_left + Vector2.UnitY, numpad_section_top_left + Vector2.UnitY + base_key_size.X_only(), Color.HotPink, 3f);
 
             //numpad
             n = 0;
