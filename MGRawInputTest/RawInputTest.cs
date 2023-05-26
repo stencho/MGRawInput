@@ -105,15 +105,18 @@ namespace MGRawInputTest
         protected void build_UI() {
             ui.add_element("mouse_drift", new MouseDeltaDriftTest(bottom_section_top_left + (Vector2.One * 3) + (Vector2.UnitX * 5f), new Vector2((bottom_section_size.X / 2f) - 3, bottom_section_size.Y - 8f)));
 
-            var tl = Drawing.measure_string_profont("exit");
-            ui.add_element("exit_button", new Button("exit", resolution.X_only() - tl.X_only() - (Vector2.UnitX * 6f)));
-
+            var tl = Drawing.measure_string_profont("x") ;
+            ui.add_element("exit_button", new Button("x", resolution.X_only() - tl.X_only() - (Vector2.UnitX * 10f)));
+            ui.add_element("minimize_button", new Button("_", resolution.X_only() - ((tl.X_only() + (Vector2.UnitX * 10f)) * 2), ui.elements["exit_button"].size));
             ((Button)ui.elements["exit_button"]).click_action = () => {
                 InputPolling.kill();
                 this.Exit();
             };
+            ((Button)ui.elements["minimize_button"]).click_action = () => {
+                UIExterns.minimize_window();
+            };
 
-            ui.add_element("title_bar", new TitleBar(Vector2.Zero, new Vector2(resolution.X - ui.elements["exit_button"].width, top_bar_height)));
+            ui.add_element("title_bar", new TitleBar(Vector2.Zero, new Vector2(resolution.X - ((ui.elements["exit_button"].width*2)), top_bar_height)));
 
             ui.add_element("mouse_delta", new MouseDeltaDisplay(
                 mouse_position + (mouse_size / 2f) + Vector2.UnitX + (Vector2.UnitY * 5f), Vector2.One * 60f));
@@ -158,9 +161,9 @@ namespace MGRawInputTest
                 top_section_size - Vector2.UnitY,
                 Color.White, 1f);
             Drawing.rect(
-                Vector2.One,
-                resolution - Vector2.UnitY,
-                Color.White, 1f);
+                Vector2.Zero,
+                resolution,
+                Color.White, 2f);
          
 
             draw_keyboard();

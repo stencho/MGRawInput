@@ -101,14 +101,14 @@ namespace MGRawInputLib {
                 }
 
                 //mouse lock 
-                if (lock_mouse && !_was_locked) {
+                if (parent != null && lock_mouse && !_was_locked) {
                     parent.IsMouseVisible = false;
                     pre_lock_mouse_pos = mouse_state.Position;
                 }
                 if (lock_mouse && parent.IsActive) {
                     reset_mouse(parent.Window.ClientBounds.Size);
                 }
-                if ((!parent.IsActive && was_active && lock_mouse) || (!lock_mouse && _was_locked)) {
+                if ((parent != null && !parent.IsActive && was_active && lock_mouse) || (!lock_mouse && _was_locked)) {
                     parent.IsMouseVisible = true;
                     Mouse.SetPosition(pre_lock_mouse_pos.X, pre_lock_mouse_pos.Y);
                 }

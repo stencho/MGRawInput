@@ -26,6 +26,11 @@ namespace MGRawInputTest {
         [DllImport("user32.dll", SetLastError = true)] public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
         [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
+        [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        public static void minimize_window() {
+            ShowWindow(actual_window_handle, 6);
+        }
 
         public static bool in_foreground() { 
             return (GetForegroundWindow() == actual_window_handle);
