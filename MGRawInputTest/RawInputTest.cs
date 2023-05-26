@@ -158,7 +158,7 @@ namespace MGRawInputTest
                 top_section_size - Vector2.UnitY,
                 Color.White, 1f);
             Drawing.rect(
-                Vector2.UnitX,
+                Vector2.One,
                 resolution - Vector2.UnitY,
                 Color.White, 1f);
          
@@ -460,14 +460,14 @@ namespace MGRawInputTest
             draw_input_key(Keys.NumPad4,          "4", "",        numpad_section_top_left + ((key_height + key_gap_y) * 2)); 
             Drawing.image(tx_key_arrow,
                 numpad_section_top_left + ((key_height + key_gap_y) * 2) + (Vector2.UnitY * 3f) + (key_height * 0.15f) + (key_width * 0.15f), base_key_size,
-                input.is_pressed(Keys.Left) ? Color.Black : Color.White,
+                input.is_pressed(Keys.NumPad4) ? Color.Black : Color.White,
                -90f); 
             n++;
             draw_input_key(Keys.NumPad5,          "5", "",        numpad_section_top_left + ((key_height + key_gap_y) * 2) + (key_gap_x * n) + (key_width * n)); n++;
             draw_input_key(Keys.NumPad6,          "6", "",        numpad_section_top_left + ((key_height + key_gap_y) * 2) + (key_gap_x * n) + (key_width * n));
             Drawing.image(tx_key_arrow,
                 numpad_section_top_left + ((key_height + key_gap_y) * 2) + (key_gap_x * n) + (key_width * n) + (Vector2.UnitY * 7f) - (Vector2.UnitX * 3f), base_key_size,
-                input.is_pressed(Keys.Right) ? Color.Black : Color.White,
+                input.is_pressed(Keys.NumPad6) ? Color.Black : Color.White,
                 90f); 
             n++;
             n = 0;
@@ -475,7 +475,7 @@ namespace MGRawInputTest
             draw_input_key(Keys.NumPad2,          "2", "",        numpad_section_top_left + ((key_height + key_gap_y) * 3) + (key_gap_x * n) + (key_width * n));
             Drawing.image(tx_key_arrow,
                 numpad_section_top_left + ((key_height + key_gap_y) * 3) + (key_gap_x * n) + (key_width * n) + (key_height * 0.15f) + Vector2.UnitX, base_key_size,
-                input.is_pressed(Keys.Down) ? Color.Black : Color.White,
+                input.is_pressed(Keys.NumPad2) ? Color.Black : Color.White,
                 180f); 
             n++;
             draw_input_key(Keys.NumPad3,          "3", "pgdn",    numpad_section_top_left + ((key_height + key_gap_y) * 3) + (key_gap_x * n) + (key_width * n)); n++;
