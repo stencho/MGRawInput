@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using MGRawInputLib;
@@ -18,13 +19,14 @@ namespace MGRawInputTest
 
     public class RawInputTest : Game {
         GraphicsDeviceManager graphics;
-
+        public static double target_fps = 60;
+        
         FPSCounter fps;
 
         public static InputManager input;
         public static InputManager input_draw;
 
-        Vector2 resolution = new Vector2(850,200);
+        public static Vector2 resolution = new Vector2(850, 600);
 
         Texture2D tx_key_arrow;
 
@@ -37,23 +39,18 @@ namespace MGRawInputTest
         Texture2D tx_mouse_xbutton1;
         Texture2D tx_mouse_xbutton2;
 
-        UIButton close_button;
-        UIButton keyboard_display;
-        UIButton mouse_display;
-        UIButton gamepad_display;
-
-        MouseDeltaUI mouse_delta_display;
+        UIElementManager ui;
 
         public RawInputTest() {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
-            this.IsFixedTimeStep = false;
+            this.IsFixedTimeStep = true;
             this.InactiveSleepTime = System.TimeSpan.Zero;
-            this.TargetElapsedTime = System.TimeSpan.FromMilliseconds(1000.0 / 120.0);
-
+            this.TargetElapsedTime = System.TimeSpan.FromMilliseconds(1000.0 / target_fps);
             Window.IsBorderless = true;
+            Window.Title = "MGRawInputTest";
 
             graphics.SynchronizeWithVerticalRetrace = true;
             
@@ -64,8 +61,10 @@ namespace MGRawInputTest
         }
 
         protected override void Initialize() {
-            InputPolling.initialize();
+            InputPolling.initialize(this);
 
+            ui = new UIElementManager();
+            
             input = new InputManager();
             input_draw = new InputManager();
 
@@ -81,17 +80,6 @@ namespace MGRawInputTest
         protected override void LoadContent() {
             Drawing.load(GraphicsDevice, graphics, Content);
 
-            var tl = Drawing.measure_string_profont("exit");
-            close_button = new UIButton("exit", resolution.X_only() - tl.X_only() - (Vector2.UnitX * 6f));
-
-            close_button.click_action = () => {
-                InputPolling.kill();
-                this.Exit();
-            };
-
-            mouse_delta_display = new MouseDeltaUI(
-                mouse_position + (mouse_size/2f) + Vector2.UnitX + (Vector2.UnitY * 5f), Vector2.One * 60f);
-
             tx_key_arrow = Content.Load<Texture2D>("key_arrow");
             
             tx_mouse_base = Content.Load<Texture2D>("mouse/mouse_base");
@@ -103,30 +91,63 @@ namespace MGRawInputTest
             tx_mouse_xbutton1 = Content.Load<Texture2D>("mouse/xbutton1");
             tx_mouse_xbutton2 = Content.Load<Texture2D>("mouse/xbutton2");
 
+            build_UI();
+
             SDF.load(Content);
+            
+
+
+            //host.GetType().BaseType.GetField("Suspend", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(host, null);
+            //host.GetType().BaseType.GetField("Resume", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(host, null);
+
+        }
+
+        protected void build_UI() {
+            ui.add_element("mouse_drift", new MouseDeltaDriftTest(bottom_section_top_left + (Vector2.One * 3) + (Vector2.UnitX * 5f), new Vector2((bottom_section_size.X / 2f) - 3, bottom_section_size.Y - 8f)));
+
+            var tl = Drawing.measure_string_profont("exit");
+            ui.add_element("exit_button", new Button("exit", resolution.X_only() - tl.X_only() - (Vector2.UnitX * 6f)));
+
+            ((Button)ui.elements["exit_button"]).click_action = () => {
+                InputPolling.kill();
+                this.Exit();
+            };
+
+            ui.add_element("title_bar", new TitleBar(Vector2.Zero, new Vector2(resolution.X - ui.elements["exit_button"].width, top_bar_height)));
+
+            ui.add_element("mouse_delta", new MouseDeltaDisplay(
+                mouse_position + (mouse_size / 2f) + Vector2.UnitX + (Vector2.UnitY * 5f), Vector2.One * 60f));
+            ((MouseDeltaDisplay)ui.elements["mouse_delta"]).set_input_manager(input_draw);
+
+            
         }
 
         protected override void Update(GameTime gameTime) {
             input.update();
 
-            close_button.update();
-            mouse_delta_display.update(input);
+            StringBuilder sb = new StringBuilder();
 
+            string title_text = $"{UIExterns.get_window_title()} {InputPolling.relative_mouse}";
+            string FPS_text = $"~{InputPolling.frame_rate} Hz poll/{fps.frame_rate} FPS draw";
+
+            ((TitleBar)ui.elements["title_bar"]).left_text = title_text;
+            ((TitleBar)ui.elements["title_bar"]).right_text = FPS_text;
+
+            ui.update();
             fps.update(gameTime);
             base.Update(gameTime);
         }
+
+        static Vector2 top_section_size = new Vector2(850, 200);
+        static Vector2 bottom_section_top_left => new Vector2(0, top_section_size.Y);
+        static Vector2 bottom_section_size => new Vector2(resolution.X, resolution.Y - top_section_size.Y);
 
         protected override void Draw(GameTime gameTime) {
             input_draw.update();
 
             GraphicsDevice.Clear(Color.Black);
 
-            string FPS_text = $"~{InputPolling.frame_rate} Hz poll/{fps.frame_rate} FPS draw";
-            float FPS_text_width = Drawing.measure_string_profont(FPS_text).X;
-            Drawing.text(FPS_text, (Vector2.UnitY * 3) + (Vector2.UnitX * resolution.X) - (Vector2.UnitX * (FPS_text_width + 35)), Color.White);
-
-            close_button.draw();
-            mouse_delta_display.draw();
+            ui.draw();
 
             Drawing.rect(
                 Vector2.UnitX,
@@ -134,15 +155,17 @@ namespace MGRawInputTest
                 Color.White, 1f);
             Drawing.rect(
                 Vector2.UnitX,
+                top_section_size - Vector2.UnitY,
+                Color.White, 1f);
+            Drawing.rect(
+                Vector2.UnitX,
                 resolution - Vector2.UnitY,
                 Color.White, 1f);
-
+         
 
             draw_keyboard();
             draw_mouse();
             //Drawing.text($"mouse delta integer [{input.mouse_delta_integer}]", Vector2.One * 50, Color.White);
-
-            Drawing.fill_circle(input.mouse_position, 4f, Color.HotPink);
 
             Drawing.end();
             base.Draw(gameTime);
@@ -467,21 +490,21 @@ namespace MGRawInputTest
         void draw_mouse() {
             Drawing.image(tx_mouse_base, mouse_position, mouse_size);
 
-            if (input.is_pressed(InputStructs.MouseButtons.Left)) 
+            if (input_draw.is_pressed(InputStructs.MouseButtons.Left)) 
                 Drawing.image(tx_mouse_left, mouse_position, mouse_size);            
-            if (input.is_pressed(InputStructs.MouseButtons.Right)) 
+            if (input_draw.is_pressed(InputStructs.MouseButtons.Right)) 
                 Drawing.image(tx_mouse_right, mouse_position, mouse_size);            
-            if (input.is_pressed(InputStructs.MouseButtons.Middle)) 
+            if (input_draw.is_pressed(InputStructs.MouseButtons.Middle)) 
                 Drawing.image(tx_mouse_middle, mouse_position, mouse_size);            
 
-            if (input.is_pressed(InputStructs.MouseButtons.ScrollUp)) 
+            if (input_draw.is_pressed(InputStructs.MouseButtons.ScrollUp)) 
                 Drawing.image(tx_mouse_scroll_up, mouse_position, mouse_size);            
-            if (input.is_pressed(InputStructs.MouseButtons.ScrollDown)) 
+            if (input_draw.is_pressed(InputStructs.MouseButtons.ScrollDown)) 
                 Drawing.image(tx_mouse_scroll_down, mouse_position, mouse_size);            
 
-            if (input.is_pressed(InputStructs.MouseButtons.X1)) 
+            if (input_draw.is_pressed(InputStructs.MouseButtons.X1)) 
                 Drawing.image(tx_mouse_xbutton1, mouse_position, mouse_size);            
-            if (input.is_pressed(InputStructs.MouseButtons.X2)) 
+            if (input_draw.is_pressed(InputStructs.MouseButtons.X2)) 
                 Drawing.image(tx_mouse_xbutton2, mouse_position, mouse_size);            
         }
 

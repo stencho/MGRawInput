@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
@@ -11,7 +12,12 @@ namespace MGRawInputLib {
     public static class InputPolling {
         static Thread control_update_thread = new Thread(new ThreadStart(update));
 
-        public static void initialize() { control_update_thread.Start(); }
+        public static List<InputManager> managers = new List<InputManager>();
+        static Game parent;
+        public static void initialize(Game parent) { 
+            InputPolling.parent = parent;
+            control_update_thread.Start(); 
+        }
         public static void kill() { run_thread = false; }
 
         public static bool num_lock => keyboard_state.NumLock;
@@ -20,6 +26,7 @@ namespace MGRawInputLib {
 
         public static KeyboardState keyboard_state {get; private set; }
         public static MouseState mouse_state { get; private set; }
+        public static MouseState mouse_state_previous { get; private set; }
 
         public static GamePadState gamepad_one_state { get; private set; }
         public static GamePadState gamepad_two_state { get; private set; }
@@ -43,24 +50,84 @@ namespace MGRawInputLib {
 
         static volatile bool run_thread = true;
 
+        public static bool lock_mouse = false;
+        static bool _was_locked = false;
+
+        enum input_method { MonoGame, RawInput, Both }
+        static input_method _input_method = input_method.Both;
+
+        public static Point mouse_delta = Point.Zero;
+        static bool was_active = false;
+
+        static Point pre_lock_mouse_pos = Point.Zero;
+
+        public static void hide_mouse() { parent.IsMouseVisible = false; }
+        public static void show_mouse() { parent.IsMouseVisible = true; }
+
+        public static bool moving_window { 
+            get { 
+                return _mv_wnd;  
+            } set {
+                if (_mv_wnd != value && value)
+                    relative_mouse = Externs.get_cursor_pos() - parent.Window.ClientBounds.Location;
+
+                _mv_wnd = value;
+            }
+        } static bool _mv_wnd = false;
+
+        public static Point relative_mouse;
+
         static void update() {
             while (run_thread) {
                 start_dt = DateTime.Now;
 
-                keyboard_state = Keyboard.GetState();
-                mouse_state = Mouse.GetState();
+                if (_input_method == input_method.Both || _input_method == input_method.MonoGame) {
+                    keyboard_state = Keyboard.GetState();
+                    mouse_state_previous = mouse_state;
+                    mouse_state = Mouse.GetState();
 
-                gamepad_one_state = GamePad.GetState(PlayerIndex.One);
-                gamepad_two_state = GamePad.GetState(PlayerIndex.Two);
-                gamepad_three_state = GamePad.GetState(PlayerIndex.Three);
-                gamepad_four_state = GamePad.GetState(PlayerIndex.Four);
+                    mouse_delta = (mouse_state.Position - mouse_state_previous.Position);
 
-                while (run_thread) {
-                    current_dt = DateTime.Now;
-                    ts = (current_dt - start_dt);
-                    if (ts.TotalMilliseconds >= thread_ms) break;
+                    foreach(InputManager man in managers) man.mouse_delta_accumulated += mouse_delta;
+
+                    gamepad_one_state = GamePad.GetState(PlayerIndex.One);
+                    gamepad_two_state = GamePad.GetState(PlayerIndex.Two);
+                    gamepad_three_state = GamePad.GetState(PlayerIndex.Three);
+                    gamepad_four_state = GamePad.GetState(PlayerIndex.Four);
+                } 
+                
+                if (_input_method == input_method.Both || _input_method == input_method.RawInput) { 
+                    //rawinput polling here
                 }
 
+                //mouse lock 
+                if (lock_mouse && !_was_locked) {
+                    parent.IsMouseVisible = false;
+                    pre_lock_mouse_pos = mouse_state.Position;
+                }
+                if (lock_mouse && parent.IsActive) {
+                    reset_mouse(parent.Window.ClientBounds.Size);
+                }
+                if ((!parent.IsActive && was_active && lock_mouse) || (!lock_mouse && _was_locked)) {
+                    parent.IsMouseVisible = true;
+                    Mouse.SetPosition(pre_lock_mouse_pos.X, pre_lock_mouse_pos.Y);
+                }
+
+                if (moving_window) {
+                    var rec = Externs.get_window_rect();
+                    var cp = Externs.get_cursor_pos();
+
+                    if (mouse_delta.X != 0 || mouse_delta.Y != 0) {
+                        Externs.MoveWindow(Externs.actual_window_handle,
+                            cp.X - relative_mouse.X,
+                            cp.Y - relative_mouse.Y,
+                            rec.Width, rec.Height, false);                        
+                    }
+                }
+                
+
+                was_active = parent.IsActive;
+                _was_locked = lock_mouse;
                 //FPS stuff here
                 _fps_timer += ts.TotalMilliseconds;
                 _frame_count++;
@@ -69,6 +136,12 @@ namespace MGRawInputLib {
                     _frame_rate = (int)(_frame_count * (1000.0 / fps_update_frequency_ms));
                     _frame_count = 0;
                     _fps_timer -= fps_update_frequency_ms;
+                }
+
+                while (run_thread) {
+                    current_dt = DateTime.Now;
+                    ts = (current_dt - start_dt);
+                    if (ts.TotalMilliseconds >= thread_ms) break;
                 }
             }
         }
@@ -92,8 +165,8 @@ namespace MGRawInputLib {
             }
         }
 
-        static void reset_mouse() {
-
+        static void reset_mouse(Point resolution) {
+            Mouse.SetPosition(resolution.X/2, resolution.Y/2);
         }
 
     }

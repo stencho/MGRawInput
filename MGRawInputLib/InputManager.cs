@@ -24,7 +24,20 @@ namespace MGRawInputLib {
     //same thing kind of applies for mouse_delta
 
     public class InputManager {
-        public Vector2 mouse_delta_integer { get; private set; }
+        public Point mouse_delta_integer { get; private set; }
+
+        Point _mouse_delta_acc = Point.Zero;
+        public Point mouse_delta_accumulated { 
+            get {
+                var ret = _mouse_delta_acc;
+                _mouse_delta_acc = Point.Zero;
+                return ret;
+            } 
+            set {
+                _mouse_delta_acc += value;
+            } 
+        }
+
         public Vector2 mouse_position { get; private set; }
         public int scroll_value { get; private set; }
         int scroll_value_previous;
@@ -41,6 +54,11 @@ namespace MGRawInputLib {
         GamePadState gamepad_two_state; GamePadState gamepad_two_state_previous;
         GamePadState gamepad_three_state; GamePadState gamepad_three_state_previous;
         GamePadState gamepad_four_state; GamePadState gamepad_four_state_previous;
+
+        public InputManager() {
+            InputPolling.managers.Add(this);
+        }
+        ~InputManager() { InputPolling.managers.Remove(this); }
 
         public void update() {
             keyboard_state_previous = keyboard_state;
@@ -62,8 +80,8 @@ namespace MGRawInputLib {
             gamepad_four_state = InputPolling.gamepad_four_state;
             
             mouse_position = mouse_state.Position.ToVector2();
-            mouse_delta_integer = (mouse_state.Position - mouse_state_previous.Position).ToVector2();
-            
+            // mouse_delta_integer = (mouse_state.Position - mouse_state_previous.Position).ToVector2();
+            mouse_delta_integer = mouse_delta_accumulated;
             scroll_value_previous = scroll_value;
             scroll_value = mouse_state.ScrollWheelValue;
 

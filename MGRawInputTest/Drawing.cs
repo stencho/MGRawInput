@@ -99,8 +99,8 @@ namespace MGRawInputTest {
 
             line(A, B, color, thickness);
 
-            fill_circle(A, thickness, color);
-            fill_circle(B, thickness, color);
+            fill_circle(A, thickness + 1f, color);
+            fill_circle(B, thickness + 1f, color);
         }
 
         public static void poly(Color color, float thickness, bool close_polygon, params Vector2[] points) {

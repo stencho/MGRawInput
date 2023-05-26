@@ -37,6 +37,7 @@ namespace MGRawInputTest {
 
             sdf_effect.Parameters["invert_map"].SetValue(invert);
             sdf_effect.Parameters["opacity"].SetValue(opacity);
+            sdf_effect.Parameters["blend"].SetValue(0.005f);
 
             sdf_effect.Parameters["inside_color"].SetValue(inner.ToVector4());
             sdf_effect.Parameters["outside_color"].SetValue(Color.Transparent.ToVector4());
@@ -60,7 +61,7 @@ namespace MGRawInputTest {
             Drawing.graphics_device.BlendState = BlendState.AlphaBlend;
             Drawing.graphics_device.DepthStencilState = DepthStencilState.Default;            
 
-            Drawing.sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap, DepthStencilState.Default, null, sdf_effect, null);
+            Drawing.sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.Default, null, sdf_effect, null);
             Drawing.sb.Draw(sdf, new Rectangle((int)position.X, (int)position.Y, (int)scale.X, (int)scale.Y), null, Color.White, 0f,
                 Vector2.Zero, SpriteEffects.None, 1f);
             Drawing.sb.End();
@@ -73,7 +74,7 @@ namespace MGRawInputTest {
 
             Drawing.end();
             
-            Drawing.sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap, DepthStencilState.Default, null, sdf_effect, null);
+            Drawing.sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.Default, null, sdf_effect, null);
             Drawing.sb.Draw(sdf, new Rectangle((int)position.X, (int)position.Y, (int)scale.X, (int)scale.Y), null, Color.White, 0f,
                 (Vector2.One * 0.5f) * tex_size, SpriteEffects.None, 1f);
             Drawing.sb.End();
