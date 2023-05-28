@@ -9,13 +9,13 @@ using Microsoft.Xna.Framework.Input;
 using static MGRawInputLib.InputStructs;
 
 namespace MGRawInputLib {
-    public static class InputPolling {
+    public static class Input {
         static Thread control_update_thread = new Thread(new ThreadStart(update));
 
-        public static List<InputManager> managers = new List<InputManager>();
+        public static List<InputHandler> handlers = new List<InputHandler>();
         static Game parent;
         public static void initialize(Game parent) { 
-            InputPolling.parent = parent;
+            Input.parent = parent;
 
             Externs.RawInput.create_rawinput_message_loop(); 
 
@@ -114,7 +114,7 @@ namespace MGRawInputLib {
 
                     mouse_delta = (mouse_state.Position - mouse_state_previous.Position);
 
-                    foreach(InputManager man in managers) man.mouse_delta_accumulated += mouse_delta;
+                    foreach(InputHandler handler in handlers) handler.mouse_delta_accumulated += mouse_delta;
 
                     gamepad_one_state = GamePad.GetState(PlayerIndex.One);
                     gamepad_two_state = GamePad.GetState(PlayerIndex.Two);

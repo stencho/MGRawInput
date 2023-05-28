@@ -85,9 +85,9 @@ namespace MGRawInputLib {
                         b = new RAWINPUT();
 
                         if (GetRawInputData(lParam, RawInputCommand.Input, out b, ref size, sizeof(RawInputHeader)) == -1) {
-                            InputPolling.RAWINPUT_DEBUG_STRING = new Win32Exception(GetLastError()).Message;
+                            Input.RAWINPUT_DEBUG_STRING = new Win32Exception(GetLastError()).Message;
                         } else {
-                            InputPolling.RAWINPUT_DEBUG_STRING = formatted_input(b);
+                            Input.RAWINPUT_DEBUG_STRING = formatted_input(b);
                         }
                     }
                     //Debug.WriteLine($"well guys we did it {wParam} {lParam}");

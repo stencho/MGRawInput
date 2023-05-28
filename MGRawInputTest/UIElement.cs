@@ -58,13 +58,13 @@ namespace MGRawInputTest {
         public abstract void draw();
         public abstract void draw_rt();
         internal void base_update() {
-            mouse_over = Collision2D.v2_intersects_rect(InputPolling.cursor_pos.ToVector2(), position, position + (size - Vector2.One));
+            mouse_over = Collision2D.v2_intersects_rect(Input.cursor_pos.ToVector2(), position, position + (size - Vector2.One));
 
             mouse_was_down = mouse_down;
-            mouse_down = InputPolling.is_pressed(InputStructs.MouseButtons.Left);
+            mouse_down = Input.is_pressed(InputStructs.MouseButtons.Left);
 
             right_mouse_was_down = right_mouse_down;
-            right_mouse_down = InputPolling.is_pressed(InputStructs.MouseButtons.Right);
+            right_mouse_down = Input.is_pressed(InputStructs.MouseButtons.Right);
             
             was_clicking = clicking;
 

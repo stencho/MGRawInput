@@ -10,8 +10,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace MGRawInputTest
-{
+namespace MGRawInputTest {
     static class Extensions {
         public static Vector2 X_only(this Vector2 v) => new Vector2(v.X, 0);
         public static Vector2 Y_only(this Vector2 v) => new Vector2(0, v.Y);
@@ -23,21 +22,21 @@ namespace MGRawInputTest
         
         FPSCounter fps;
 
-        public static InputManager input;
-        public static InputManager input_draw;
+        public static InputHandler input = new InputHandler();
+        public static InputHandler input_draw = new InputHandler();
 
         public static Vector2 resolution = new Vector2(850, 600);
 
         Texture2D tx_key_arrow;
 
-        Texture2D tx_mouse_base;
-        Texture2D tx_mouse_left;
-        Texture2D tx_mouse_right;
-        Texture2D tx_mouse_middle;
-        Texture2D tx_mouse_scroll_up;
-        Texture2D tx_mouse_scroll_down;
-        Texture2D tx_mouse_xbutton1;
-        Texture2D tx_mouse_xbutton2;
+        Texture2D tx_mouse_base, 
+            tx_mouse_left,
+            tx_mouse_right,
+            tx_mouse_middle,
+            tx_mouse_scroll_up, 
+            tx_mouse_scroll_down,
+            tx_mouse_xbutton1,
+            tx_mouse_xbutton2;
 
         UIElementManager ui;
 
@@ -61,20 +60,17 @@ namespace MGRawInputTest
         }
 
         protected override void Initialize() {
-            InputPolling.initialize(this);
+            Input.initialize(this);
 
             ui = new UIElementManager();
             
-            input = new InputManager();
-            input_draw = new InputManager();
-
             fps = new FPSCounter();
             this.Disposed += RawInputTest_Disposed;
             base.Initialize();
         }
 
         private void RawInputTest_Disposed(object sender, System.EventArgs e) {
-            InputPolling.kill();
+            Input.kill();
         }
 
         protected override void LoadContent() {
@@ -109,7 +105,7 @@ namespace MGRawInputTest
             ui.add_element("exit_button", new Button("x", resolution.X_only() - tl.X_only() - (Vector2.UnitX * 10f)));
             ui.add_element("minimize_button", new Button("_", resolution.X_only() - ((tl.X_only() + (Vector2.UnitX * 10f)) * 2), ui.elements["exit_button"].size));
             ((Button)ui.elements["exit_button"]).click_action = () => {
-                InputPolling.kill();
+                Input.kill();
                 this.Exit();
             };
             ((Button)ui.elements["minimize_button"]).click_action = () => {
@@ -125,11 +121,11 @@ namespace MGRawInputTest
 
             ui.add_element("method_switch", new Button("MonoGame", Vector2.UnitX * 100));
             ((Button)ui.elements["method_switch"]).click_action = () => {
-                if (InputPolling.poll_method == InputPolling.input_method.RawInput) {
-                    InputPolling.change_polling_method(InputPolling.input_method.MonoGame);
+                if (Input.poll_method == Input.input_method.RawInput) {
+                    Input.change_polling_method(Input.input_method.MonoGame);
                     ((Button)ui.elements["method_switch"]).change_text("MonoGame");
                 } else {
-                    InputPolling.change_polling_method(InputPolling.input_method.RawInput);
+                    Input.change_polling_method(Input.input_method.RawInput);
                     ((Button)ui.elements["method_switch"]).change_text("RawInput");
                 }
             };
@@ -140,8 +136,8 @@ namespace MGRawInputTest
 
             StringBuilder sb = new StringBuilder();
 
-            string title_text = $"{UIExterns.get_window_title()} {InputPolling.relative_mouse}";
-            string FPS_text = $"~{InputPolling.frame_rate} Hz poll/{fps.frame_rate} FPS draw";
+            string title_text = $"{UIExterns.get_window_title()} {Input.relative_mouse}";
+            string FPS_text = $"~{Input.frame_rate} Hz poll/{fps.frame_rate} FPS draw";
 
             ((TitleBar)ui.elements["title_bar"]).left_text = title_text;
             ((TitleBar)ui.elements["title_bar"]).right_text = FPS_text;
@@ -170,75 +166,18 @@ namespace MGRawInputTest
             draw_mouse();
 
 
-            Drawing.text($"[{InputPolling.RAWINPUT_DEBUG_STRING}]", Vector2.UnitX * 200 + (Vector2.One * 3f), Color.White);
+            Drawing.text($"[{Input.RAWINPUT_DEBUG_STRING}]", Vector2.UnitX * 200 + (Vector2.One * 3f), Color.White);
 
             Drawing.end();
             base.Draw(gameTime);
         }
 
-
+        //EVERYTHING BELOW THIS IS KEYBOARD/MOUSE DRAWING CODE
 
         static float top_bar_height = 16f;
 
         Vector2 client_bounds_top_left => Vector2.UnitY * top_bar_height;
-        Vector2 client_bounds_bottom_right => client_bounds_top_left + (resolution - client_bounds_top_left);
         Vector2 client_bounds_size => (resolution - client_bounds_top_left);
-
-        enum align_text { left, right, center }
-        
-        void draw_input_key(Keys key, Vector2 position) { draw_input_key(key, "", key.ToString(), position, base_key_size, align_text.center); }
-        void draw_input_key(Keys key, string key_string, Vector2 position) { draw_input_key(key, "", key_string, position, base_key_size, align_text.center); }
-        void draw_input_key(Keys key, string key_string, Vector2 position, Vector2 size) { draw_input_key(key, "", key_string, position, size, align_text.center); }
-        void draw_input_key(Keys key, string key_string, Vector2 position, Vector2 size, align_text alignment) { draw_input_key(key, "", key_string, position, size, alignment); }
-        void draw_input_key(Keys key, string key_string_top, string key_string_bottom, Vector2 position) { draw_input_key(key, key_string_top, key_string_bottom, position, align_text.center); }
-        void draw_input_key(Keys key, string key_string_top, string key_string_bottom, Vector2 position, align_text alignment) { draw_input_key(key, key_string_top, key_string_bottom, position, base_key_size, alignment); }
-        void draw_input_key(Keys key, string key_string_top, string key_string_bottom, Vector2 position, Vector2 size) { draw_input_key(key, key_string_top, key_string_bottom, position, size, align_text.center); }
-        void draw_input_key(Keys key, string key_string_top, string key_string_bottom, Vector2 position, Vector2 size, align_text alignment) {
-            bool invert_text = false;
-
-            /*if (input.just_pressed(key)) {
-                Drawing.fill_rect(position, size.X, size.Y, Color.HotPink);
-            } else if (input_draw.just_pressed(key)) {
-                Drawing.fill_rect(position, size.X, size.Y, Color.Red);
-            } else*/
-            if (InputPolling.is_pressed(key)) {
-                Drawing.fill_rect(position, size.X, size.Y, Color.White);
-                invert_text = true;
-            }
-                
-            Drawing.rect(position, size.X, size.Y, Color.White, 1f);
-
-            var text_pos_top = Vector2.Zero;
-            var text_pos_bottom = Vector2.Zero;
-
-            var kst = Drawing.measure_string_profont(key_string_top);
-            var ksb = Drawing.measure_string_profont(key_string_bottom);
-
-            switch (alignment) {
-                case align_text.left:
-                    text_pos_top = position + (Vector2.UnitY * 3) + (Vector2.UnitX * 3);
-                    text_pos_bottom = (position + size.Y_only()) - (ksb.Y_only()) + (Vector2.UnitX * 3);
-                    break;
-
-                case align_text.center:
-                    text_pos_top = position + (size / 2f).X_only() - (Drawing.measure_string_profont(key_string_top).X_only()/2f) + (Vector2.UnitY * 3) ;
-                    text_pos_bottom = (position + (size - (size.X_only() / 2f))) - (ksb.X_only() / 2f) - (ksb.Y_only());
-                    break;
-
-                case align_text.right:
-                    text_pos_top = (position + (Vector2.UnitX * size.X)) - kst.X_only() - (Vector2.UnitX * 3) + (Vector2.UnitY * 3);
-                    text_pos_bottom = (position + size) - ksb - (Vector2.UnitX * 3);
-                    break;
-            }
-
-            Drawing.text(key_string_top, 
-                text_pos_top,
-                (invert_text ? Color.Black : Color.White));
-
-            Drawing.text(key_string_bottom, 
-                text_pos_bottom, 
-                (invert_text ? Color.Black : Color.White));
-        }
 
         //keyboard drawing
         //lomarf this should be good
@@ -249,7 +188,6 @@ namespace MGRawInputTest
         Vector2 top_row_height => Vector2.UnitY * (base_key_size.Y + 6);
 
         Vector2 base_key_size => new Vector2(30, 26);
-        Vector2 half_key_size => (base_key_size / 2f);
         Vector2 key_width => base_key_size.X_only();
         Vector2 key_height => base_key_size.Y_only();
         
@@ -297,6 +235,62 @@ namespace MGRawInputTest
         Vector2 homeend_section_top_left => prtscr_section_top_left + top_row_height;
         Vector2 numpad_section_top_left => homeend_section_top_left + ((key_width + key_gap_x) * 3) + section_gap + Vector2.UnitX;
         Vector2 numpad_section_top_right => numpad_section_top_left + ((key_width + key_gap_x) * 4) + section_gap;
+
+        enum align_text { left, right, center }
+
+        void draw_input_key(Keys key, Vector2 position) { draw_input_key(key, "", key.ToString(), position, base_key_size, align_text.center); }
+        void draw_input_key(Keys key, string key_string, Vector2 position) { draw_input_key(key, "", key_string, position, base_key_size, align_text.center); }
+        void draw_input_key(Keys key, string key_string, Vector2 position, Vector2 size) { draw_input_key(key, "", key_string, position, size, align_text.center); }
+        void draw_input_key(Keys key, string key_string, Vector2 position, Vector2 size, align_text alignment) { draw_input_key(key, "", key_string, position, size, alignment); }
+        void draw_input_key(Keys key, string key_string_top, string key_string_bottom, Vector2 position) { draw_input_key(key, key_string_top, key_string_bottom, position, align_text.center); }
+        void draw_input_key(Keys key, string key_string_top, string key_string_bottom, Vector2 position, align_text alignment) { draw_input_key(key, key_string_top, key_string_bottom, position, base_key_size, alignment); }
+        void draw_input_key(Keys key, string key_string_top, string key_string_bottom, Vector2 position, Vector2 size) { draw_input_key(key, key_string_top, key_string_bottom, position, size, align_text.center); }
+        void draw_input_key(Keys key, string key_string_top, string key_string_bottom, Vector2 position, Vector2 size, align_text alignment) {
+            bool invert_text = false;
+
+            /*if (input.just_pressed(key)) {
+                Drawing.fill_rect(position, size.X, size.Y, Color.HotPink);
+            } else if (input_draw.just_pressed(key)) {
+                Drawing.fill_rect(position, size.X, size.Y, Color.Red);
+            } else*/
+            if (Input.is_pressed(key)) {
+                Drawing.fill_rect(position, size.X, size.Y, Color.White);
+                invert_text = true;
+            }
+
+            Drawing.rect(position, size.X, size.Y, Color.White, 1f);
+
+            var text_pos_top = Vector2.Zero;
+            var text_pos_bottom = Vector2.Zero;
+
+            var kst = Drawing.measure_string_profont(key_string_top);
+            var ksb = Drawing.measure_string_profont(key_string_bottom);
+
+            switch (alignment) {
+                case align_text.left:
+                    text_pos_top = position + (Vector2.UnitY * 3) + (Vector2.UnitX * 3);
+                    text_pos_bottom = (position + size.Y_only()) - (ksb.Y_only()) + (Vector2.UnitX * 3);
+                    break;
+
+                case align_text.center:
+                    text_pos_top = position + (size / 2f).X_only() - (Drawing.measure_string_profont(key_string_top).X_only() / 2f) + (Vector2.UnitY * 3);
+                    text_pos_bottom = (position + (size - (size.X_only() / 2f))) - (ksb.X_only() / 2f) - (ksb.Y_only());
+                    break;
+
+                case align_text.right:
+                    text_pos_top = (position + (Vector2.UnitX * size.X)) - kst.X_only() - (Vector2.UnitX * 3) + (Vector2.UnitY * 3);
+                    text_pos_bottom = (position + size) - ksb - (Vector2.UnitX * 3);
+                    break;
+            }
+
+            Drawing.text(key_string_top,
+                text_pos_top,
+                (invert_text ? Color.Black : Color.White));
+
+            Drawing.text(key_string_bottom,
+                text_pos_bottom,
+                (invert_text ? Color.Black : Color.White));
+        }
 
 
         //you ever just write something and know you don't need to write it but you know it's kinda neat and could be vaguely useful in the future        
@@ -374,7 +368,7 @@ namespace MGRawInputTest
             draw_input_key(Keys.OemPipe,          "|", "\\",      tab_top_right + (key_gap_x * n) + (key_width * (n-1)), backslash_size);
 
             //caps lock enabled bar
-            if (InputPolling.caps_lock) Drawing.line(fourth_row_top_left + Vector2.UnitY, fourth_row_top_left + Vector2.UnitY + caps_size.X_only(), Color.HotPink, 3f);
+            if (Input.caps_lock) Drawing.line(fourth_row_top_left + Vector2.UnitY, fourth_row_top_left + Vector2.UnitY + caps_size.X_only(), Color.HotPink, 3f);
 
             //fourth row
             n = 0;                                
@@ -428,22 +422,22 @@ namespace MGRawInputTest
             //arrow key glyphs
             Drawing.image(tx_key_arrow, 
                 up_arrow, base_key_size,
-                InputPolling.is_pressed(Keys.Up) ? Color.Black : Color.White);
+                Input.is_pressed(Keys.Up) ? Color.Black : Color.White);
             Drawing.image(tx_key_arrow, 
                 down_arrow + Vector2.UnitX, base_key_size,
-                InputPolling.is_pressed(Keys.Down) ? Color.Black : Color.White, 
+                Input.is_pressed(Keys.Down) ? Color.Black : Color.White, 
                 180f);
             Drawing.image(tx_key_arrow, 
                 left_arrow + (Vector2.UnitY * 3f), base_key_size,
-                InputPolling.is_pressed(Keys.Left) ? Color.Black : Color.White,
+                Input.is_pressed(Keys.Left) ? Color.Black : Color.White,
                -90f);
             Drawing.image(tx_key_arrow, 
                 right_arrow + (Vector2.UnitY * 3f) + (Vector2.UnitX * 4f), base_key_size,
-                InputPolling.is_pressed(Keys.Right) ? Color.Black : Color.White,
+                Input.is_pressed(Keys.Right) ? Color.Black : Color.White,
                 90f);
 
             //num lock enabled bar
-            if (InputPolling.num_lock) 
+            if (Input.num_lock) 
                 Drawing.line(numpad_section_top_left + Vector2.UnitY, numpad_section_top_left + Vector2.UnitY + base_key_size.X_only(), Color.HotPink, 3f);
 
             //numpad
@@ -457,7 +451,7 @@ namespace MGRawInputTest
             draw_input_key(Keys.NumPad8,          "8", "",        numpad_section_top_left + (key_height + key_gap_y) + (key_gap_x * n) + (key_width * n)); 
             Drawing.image(tx_key_arrow,
                 numpad_section_top_left + (key_height + key_gap_y) + (key_gap_x * n) + (key_width * n) + (key_height * 0.4f), base_key_size,
-                InputPolling.is_pressed(Keys.NumPad8) ? Color.Black : Color.White); 
+                Input.is_pressed(Keys.NumPad8) ? Color.Black : Color.White); 
             n++;
             draw_input_key(Keys.NumPad9,          "9", "pgup",    numpad_section_top_left + (key_height + key_gap_y) + (key_gap_x * n) + (key_width * n)); n++;
             draw_input_key(Keys.Add,              "+", "",        numpad_section_top_left + (key_height + key_gap_y) + (key_gap_x * n) + (key_width * n), base_key_size + (base_key_size.Y_only() + key_gap_y )); n++;
@@ -465,14 +459,14 @@ namespace MGRawInputTest
             draw_input_key(Keys.NumPad4,          "4", "",        numpad_section_top_left + ((key_height + key_gap_y) * 2)); 
             Drawing.image(tx_key_arrow,
                 numpad_section_top_left + ((key_height + key_gap_y) * 2) + (Vector2.UnitY * 3f) + (key_height * 0.15f) + (key_width * 0.15f), base_key_size,
-                InputPolling.is_pressed(Keys.NumPad4) ? Color.Black : Color.White,
+                Input.is_pressed(Keys.NumPad4) ? Color.Black : Color.White,
                -90f); 
             n++;
             draw_input_key(Keys.NumPad5,          "5", "",        numpad_section_top_left + ((key_height + key_gap_y) * 2) + (key_gap_x * n) + (key_width * n)); n++;
             draw_input_key(Keys.NumPad6,          "6", "",        numpad_section_top_left + ((key_height + key_gap_y) * 2) + (key_gap_x * n) + (key_width * n));
             Drawing.image(tx_key_arrow,
                 numpad_section_top_left + ((key_height + key_gap_y) * 2) + (key_gap_x * n) + (key_width * n) + (Vector2.UnitY * 7f) - (Vector2.UnitX * 3f), base_key_size,
-                InputPolling.is_pressed(Keys.NumPad6) ? Color.Black : Color.White,
+                Input.is_pressed(Keys.NumPad6) ? Color.Black : Color.White,
                 90f); 
             n++;
             n = 0;
@@ -480,7 +474,7 @@ namespace MGRawInputTest
             draw_input_key(Keys.NumPad2,          "2", "",        numpad_section_top_left + ((key_height + key_gap_y) * 3) + (key_gap_x * n) + (key_width * n));
             Drawing.image(tx_key_arrow,
                 numpad_section_top_left + ((key_height + key_gap_y) * 3) + (key_gap_x * n) + (key_width * n) + (key_height * 0.15f) + Vector2.UnitX, base_key_size,
-                InputPolling.is_pressed(Keys.NumPad2) ? Color.Black : Color.White,
+                Input.is_pressed(Keys.NumPad2) ? Color.Black : Color.White,
                 180f); 
             n++;
             draw_input_key(Keys.NumPad3,          "3", "pgdn",    numpad_section_top_left + ((key_height + key_gap_y) * 3) + (key_gap_x * n) + (key_width * n)); n++;
@@ -495,21 +489,21 @@ namespace MGRawInputTest
         void draw_mouse() {
             Drawing.image(tx_mouse_base, mouse_position, mouse_size);
 
-            if (InputPolling.is_pressed(InputStructs.MouseButtons.Left)) 
+            if (Input.is_pressed(InputStructs.MouseButtons.Left)) 
                 Drawing.image(tx_mouse_left, mouse_position, mouse_size);            
-            if (InputPolling.is_pressed(InputStructs.MouseButtons.Right)) 
+            if (Input.is_pressed(InputStructs.MouseButtons.Right)) 
                 Drawing.image(tx_mouse_right, mouse_position, mouse_size);            
-            if (InputPolling.is_pressed(InputStructs.MouseButtons.Middle)) 
+            if (Input.is_pressed(InputStructs.MouseButtons.Middle)) 
                 Drawing.image(tx_mouse_middle, mouse_position, mouse_size);            
 
-            if (InputPolling.is_pressed(InputStructs.MouseButtons.ScrollUp)) 
+            if (Input.is_pressed(InputStructs.MouseButtons.ScrollUp)) 
                 Drawing.image(tx_mouse_scroll_up, mouse_position, mouse_size);            
-            if (InputPolling.is_pressed(InputStructs.MouseButtons.ScrollDown)) 
+            if (Input.is_pressed(InputStructs.MouseButtons.ScrollDown)) 
                 Drawing.image(tx_mouse_scroll_down, mouse_position, mouse_size);            
 
-            if (InputPolling.is_pressed(InputStructs.MouseButtons.X1)) 
+            if (Input.is_pressed(InputStructs.MouseButtons.X1)) 
                 Drawing.image(tx_mouse_xbutton1, mouse_position, mouse_size);            
-            if (InputPolling.is_pressed(InputStructs.MouseButtons.X2)) 
+            if (Input.is_pressed(InputStructs.MouseButtons.X2)) 
                 Drawing.image(tx_mouse_xbutton2, mouse_position, mouse_size);            
         }
 

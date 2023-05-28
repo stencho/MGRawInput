@@ -23,7 +23,7 @@ namespace MGRawInputLib {
 
     //same thing kind of applies for mouse_delta
 
-    public class InputManager {
+    public class InputHandler {
         public Point mouse_delta_integer { get; private set; }
 
         Point _mouse_delta_acc = Point.Zero;
@@ -47,13 +47,13 @@ namespace MGRawInputLib {
         int scroll_delta_last_frame = 0;
 
 
-        public InputManager() {
-            InputPolling.managers.Add(this);
+        public InputHandler() {
+            Input.handlers.Add(this);
         }
-        ~InputManager() { InputPolling.managers.Remove(this); }
+        ~InputHandler() { Input.handlers.Remove(this); }
 
         public void update() {
-            mouse_position = InputPolling.cursor_pos.ToVector2();
+            mouse_position = Input.cursor_pos.ToVector2();
             mouse_delta_integer = mouse_delta_accumulated;
 
             scroll_delta_last_frame = _scroll_delta;

@@ -38,14 +38,14 @@ namespace MGRawInputTest.UIElements {
             SDF.draw_centered(Drawing.sdf_circle, RawInput_test_mouse_pos, Vector2.One * 7f, Color.LightBlue);
             if (clicking) {
                 if (!was_clicking) 
-                    InputPolling.hide_mouse();
+                    Input.hide_mouse();
 
                 //RESTORE THIS
                 //SDF.draw_centered(Drawing.sdf_circle, RawInputTest.input_draw.mouse_position - position, Vector2.One * 7f, Color.Transparent, Color.HotPink, 0.99f, 0.4f, 1f, false);
             } 
             
             if (!mouse_down && mouse_was_down) { 
-                InputPolling.show_mouse();
+                Input.show_mouse();
             }
         }
 

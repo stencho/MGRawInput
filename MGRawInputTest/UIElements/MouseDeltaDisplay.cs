@@ -15,8 +15,8 @@ namespace MGRawInputTest.UIElements {
             this.position = position;
             this.size = size;
         }
-        InputManager input;
-        public void set_input_manager(InputManager input) { this.input = input; }
+        InputHandler input;
+        public void set_input_manager(InputHandler input) { this.input = input; }
         public override void update() {
             //RESTORE THIS
             if (input != null)
