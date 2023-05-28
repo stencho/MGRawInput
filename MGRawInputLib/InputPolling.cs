@@ -16,6 +16,9 @@ namespace MGRawInputLib {
         static Game parent;
         public static void initialize(Game parent) { 
             InputPolling.parent = parent;
+
+            Externs.RawInput.create_rawinput_message_loop(); 
+
             control_update_thread.Start(); 
         }
         public static void kill() { run_thread = false; }
@@ -24,9 +27,9 @@ namespace MGRawInputLib {
         public static bool caps_lock => keyboard_state.CapsLock;
 
 
-        public static KeyboardState keyboard_state {get; private set; }
-        public static MouseState mouse_state { get; private set; }
-        public static MouseState mouse_state_previous { get; private set; }
+        public static KeyboardState keyboard_state {get; set; }
+        public static MouseState mouse_state { get; set; }
+        public static MouseState mouse_state_previous { get; set; }
 
         public static GamePadState gamepad_one_state { get; private set; }
         public static GamePadState gamepad_two_state { get; private set; }
@@ -53,13 +56,33 @@ namespace MGRawInputLib {
         public static bool lock_mouse = false;
         static bool _was_locked = false;
 
-        enum input_method { MonoGame, RawInput, Both }
-        static input_method _input_method = input_method.Both;
+        public enum input_method { MonoGame, RawInput, Both }
+        static input_method _input_method = input_method.MonoGame;
+        public static input_method poll_method => _input_method;
+        public static void change_polling_method(input_method method) {
+            if (_input_method != input_method.RawInput && method == input_method.RawInput) {
+                Externs.RawInput.enable = true;
+            } else if (_input_method != input_method.Both && method == input_method.Both) {
+                Externs.RawInput.enable = true;
+            } else if (_input_method != input_method.MonoGame && method == input_method.MonoGame) {
+                Externs.RawInput.enable = false;
+            }
+            _input_method = method;
+        }
 
         public static Point mouse_delta = Point.Zero;
         static bool was_active = false;
 
+        public static Vector2 mouse_delta_rawinput;
+
         static Point pre_lock_mouse_pos = Point.Zero;
+
+        public static Point cursor_pos;
+        public static Point cursor_pos_actual;
+
+
+        public static string RAWINPUT_DEBUG_STRING = "";
+
 
         public static void hide_mouse() { parent.IsMouseVisible = false; }
         public static void show_mouse() { parent.IsMouseVisible = true; }
@@ -81,6 +104,9 @@ namespace MGRawInputLib {
             while (run_thread) {
                 start_dt = DateTime.Now;
 
+                cursor_pos = Externs.get_cursor_pos_relative_to_window();
+                cursor_pos_actual = Externs.get_cursor_pos();
+
                 if (_input_method == input_method.Both || _input_method == input_method.MonoGame) {
                     keyboard_state = Keyboard.GetState();
                     mouse_state_previous = mouse_state;
@@ -96,8 +122,10 @@ namespace MGRawInputLib {
                     gamepad_four_state = GamePad.GetState(PlayerIndex.Four);
                 } 
                 
-                if (_input_method == input_method.Both || _input_method == input_method.RawInput) { 
+                if (_input_method == input_method.Both || _input_method == input_method.RawInput) {
                     //rawinput polling here
+
+                    
                 }
 
                 //mouse lock 
@@ -146,23 +174,29 @@ namespace MGRawInputLib {
             }
         }
         public static bool is_pressed(Keys key) {
-            return keyboard_state.IsKeyDown(key);
+            if (_input_method == input_method.MonoGame) return keyboard_state.IsKeyDown(key);
+            else if (_input_method == input_method.RawInput) return false;
+            else return keyboard_state.IsKeyDown(key) || false;
         }
         
         public static bool is_pressed(MouseButtons mouse_button) {
-            switch (mouse_button) {
-                case MouseButtons.Left:
-                    return mouse_state.LeftButton == ButtonState.Pressed;
-                case MouseButtons.Right:
-                    return mouse_state.RightButton == ButtonState.Pressed;
-                case MouseButtons.Middle:
-                    return mouse_state.MiddleButton == ButtonState.Pressed;
-                case MouseButtons.X1:
-                    return mouse_state.XButton1 == ButtonState.Pressed;
-                case MouseButtons.X2:
-                    return mouse_state.XButton2 == ButtonState.Pressed;
-                default: return false;
-            }
+            if (_input_method == input_method.MonoGame) {
+                switch (mouse_button) {
+                    case MouseButtons.Left:
+                        return mouse_state.LeftButton == ButtonState.Pressed;
+                    case MouseButtons.Right:
+                        return mouse_state.RightButton == ButtonState.Pressed;
+                    case MouseButtons.Middle:
+                        return mouse_state.MiddleButton == ButtonState.Pressed;
+                    case MouseButtons.X1:
+                        return mouse_state.XButton1 == ButtonState.Pressed;
+                    case MouseButtons.X2:
+                        return mouse_state.XButton2 == ButtonState.Pressed;
+                    default: return false;
+                }
+            } 
+            else if (_input_method == input_method.RawInput) return false;
+            else return false;
         }
 
         static void reset_mouse(Point resolution) {
@@ -171,3 +205,4 @@ namespace MGRawInputLib {
 
     }
 }
+

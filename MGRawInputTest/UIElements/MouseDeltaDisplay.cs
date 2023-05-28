@@ -18,6 +18,7 @@ namespace MGRawInputTest.UIElements {
         InputManager input;
         public void set_input_manager(InputManager input) { this.input = input; }
         public override void update() {
+            //RESTORE THIS
             if (input != null)
                 base_delta = input.mouse_delta_integer.ToVector2();
         }

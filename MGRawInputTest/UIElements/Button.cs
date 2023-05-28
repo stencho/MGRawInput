@@ -8,27 +8,30 @@ using Microsoft.Xna.Framework;
 
 namespace MGRawInputTest.UIElements { 
     public class Button : UIElement {
-        string text = "button";
+        string _text = "button";
+        public string text => _text;
         Vector2 margin = (Vector2.UnitY * 2f) + (Vector2.UnitX * 5);
 
         public Action click_action = null;
 
         public Button(string text, Vector2 position, Vector2 size) : base(position, size) {
-            this.text = text;
+            _text = text;
         }
 
         public Button(string text, Vector2 position) : base(position, Vector2.Zero) {
-            this.text = text;
+            _text = text;
             this.position = position;
             size = (margin * 2) + Drawing.measure_string_profont(text);
         }
 
-        public override void update() {
-            base_update();
+        public void change_text(string text) {
+            _text = text;
+            size = (margin * 2) + Drawing.measure_string_profont(text);
+        }
 
+        public override void update() {
             //successful click, released left mouse while over the button and clicking
-            if (!clicking && was_clicking && mouse_over)
-            {
+            if (!clicking && was_clicking && mouse_over) {
                 if (click_action != null) click_action();
             }
         }
@@ -37,7 +40,7 @@ namespace MGRawInputTest.UIElements {
         public override void draw() { 
             bool col_toggle = mouse_over && !mouse_down;
             Drawing.fill_rect_outline(position, position + size, col_toggle ? Color.White : Color.Black, Color.White, 1f);
-            Drawing.text(text, position + margin, col_toggle ? Color.Black : Color.White);
+            Drawing.text(_text, position + margin, col_toggle ? Color.Black : Color.White);
         }
         public override void draw_rt() { }
     }

@@ -15,6 +15,7 @@ namespace MGRawInputTest {
 
         public void update() { 
             foreach(string k in elements.Keys) {
+                elements[k].base_update();
                 elements[k].update();                
             }
         }

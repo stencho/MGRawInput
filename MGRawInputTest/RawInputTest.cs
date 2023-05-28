@@ -103,7 +103,7 @@ namespace MGRawInputTest
         }
 
         protected void build_UI() {
-            ui.add_element("mouse_drift", new MouseDeltaDriftTest(bottom_section_top_left + (Vector2.One * 3) + (Vector2.UnitX * 5f), new Vector2((bottom_section_size.X / 2f) - 3, bottom_section_size.Y - 8f)));
+            ui.add_element("mouse_drift", new MouseDeltaDriftTest(bottom_section_top_left + (Vector2.One * 3) + (Vector2.UnitX * 2f), new Vector2((bottom_section_size.X / 2f) - 3, bottom_section_size.Y - 8f)));
 
             var tl = Drawing.measure_string_profont("x") ;
             ui.add_element("exit_button", new Button("x", resolution.X_only() - tl.X_only() - (Vector2.UnitX * 10f)));
@@ -116,13 +116,23 @@ namespace MGRawInputTest
                 UIExterns.minimize_window();
             };
 
+
             ui.add_element("title_bar", new TitleBar(Vector2.Zero, new Vector2(resolution.X - ((ui.elements["exit_button"].width*2)), top_bar_height)));
 
             ui.add_element("mouse_delta", new MouseDeltaDisplay(
                 mouse_position + (mouse_size / 2f) + Vector2.UnitX + (Vector2.UnitY * 5f), Vector2.One * 60f));
             ((MouseDeltaDisplay)ui.elements["mouse_delta"]).set_input_manager(input_draw);
 
-            
+            ui.add_element("method_switch", new Button("MonoGame", Vector2.UnitX * 100));
+            ((Button)ui.elements["method_switch"]).click_action = () => {
+                if (InputPolling.poll_method == InputPolling.input_method.RawInput) {
+                    InputPolling.change_polling_method(InputPolling.input_method.MonoGame);
+                    ((Button)ui.elements["method_switch"]).change_text("MonoGame");
+                } else {
+                    InputPolling.change_polling_method(InputPolling.input_method.RawInput);
+                    ((Button)ui.elements["method_switch"]).change_text("RawInput");
+                }
+            };
         }
 
         protected override void Update(GameTime gameTime) {
@@ -149,26 +159,18 @@ namespace MGRawInputTest
             input_draw.update();
 
             GraphicsDevice.Clear(Color.Black);
-
+            
             ui.draw();
 
-            Drawing.rect(
-                Vector2.UnitX,
-                (Vector2.UnitY * top_bar_height) + (Vector2.UnitX * resolution.X),
-                Color.White, 1f);
-            Drawing.rect(
-                Vector2.UnitX,
-                top_section_size - Vector2.UnitY,
-                Color.White, 1f);
-            Drawing.rect(
-                Vector2.Zero,
-                resolution,
-                Color.White, 2f);
+            Drawing.rect(Vector2.UnitX, (Vector2.UnitY * top_bar_height) + (Vector2.UnitX * resolution.X), Color.White, 1f);
+            Drawing.rect(Vector2.UnitX, top_section_size - Vector2.UnitY, Color.White, 1f); 
+            Drawing.rect(Vector2.Zero, resolution, Color.White, 2f);
          
-
             draw_keyboard();
             draw_mouse();
-            //Drawing.text($"mouse delta integer [{input.mouse_delta_integer}]", Vector2.One * 50, Color.White);
+
+
+            Drawing.text($"[{InputPolling.RAWINPUT_DEBUG_STRING}]", Vector2.UnitX * 200 + (Vector2.One * 3f), Color.White);
 
             Drawing.end();
             base.Draw(gameTime);
@@ -199,7 +201,7 @@ namespace MGRawInputTest
             } else if (input_draw.just_pressed(key)) {
                 Drawing.fill_rect(position, size.X, size.Y, Color.Red);
             } else*/
-            if (input_draw.is_pressed(key)) {
+            if (InputPolling.is_pressed(key)) {
                 Drawing.fill_rect(position, size.X, size.Y, Color.White);
                 invert_text = true;
             }
@@ -425,19 +427,19 @@ namespace MGRawInputTest
 
             //arrow key glyphs
             Drawing.image(tx_key_arrow, 
-                up_arrow, base_key_size, 
-                input.is_pressed(Keys.Up) ? Color.Black : Color.White);
+                up_arrow, base_key_size,
+                InputPolling.is_pressed(Keys.Up) ? Color.Black : Color.White);
             Drawing.image(tx_key_arrow, 
-                down_arrow + Vector2.UnitX, base_key_size, 
-                input.is_pressed(Keys.Down) ? Color.Black : Color.White, 
+                down_arrow + Vector2.UnitX, base_key_size,
+                InputPolling.is_pressed(Keys.Down) ? Color.Black : Color.White, 
                 180f);
             Drawing.image(tx_key_arrow, 
                 left_arrow + (Vector2.UnitY * 3f), base_key_size,
-                input.is_pressed(Keys.Left) ? Color.Black : Color.White,
+                InputPolling.is_pressed(Keys.Left) ? Color.Black : Color.White,
                -90f);
             Drawing.image(tx_key_arrow, 
                 right_arrow + (Vector2.UnitY * 3f) + (Vector2.UnitX * 4f), base_key_size,
-                input.is_pressed(Keys.Right) ? Color.Black : Color.White,
+                InputPolling.is_pressed(Keys.Right) ? Color.Black : Color.White,
                 90f);
 
             //num lock enabled bar
@@ -455,7 +457,7 @@ namespace MGRawInputTest
             draw_input_key(Keys.NumPad8,          "8", "",        numpad_section_top_left + (key_height + key_gap_y) + (key_gap_x * n) + (key_width * n)); 
             Drawing.image(tx_key_arrow,
                 numpad_section_top_left + (key_height + key_gap_y) + (key_gap_x * n) + (key_width * n) + (key_height * 0.4f), base_key_size,
-                input.is_pressed(Keys.NumPad8) ? Color.Black : Color.White); 
+                InputPolling.is_pressed(Keys.NumPad8) ? Color.Black : Color.White); 
             n++;
             draw_input_key(Keys.NumPad9,          "9", "pgup",    numpad_section_top_left + (key_height + key_gap_y) + (key_gap_x * n) + (key_width * n)); n++;
             draw_input_key(Keys.Add,              "+", "",        numpad_section_top_left + (key_height + key_gap_y) + (key_gap_x * n) + (key_width * n), base_key_size + (base_key_size.Y_only() + key_gap_y )); n++;
@@ -463,14 +465,14 @@ namespace MGRawInputTest
             draw_input_key(Keys.NumPad4,          "4", "",        numpad_section_top_left + ((key_height + key_gap_y) * 2)); 
             Drawing.image(tx_key_arrow,
                 numpad_section_top_left + ((key_height + key_gap_y) * 2) + (Vector2.UnitY * 3f) + (key_height * 0.15f) + (key_width * 0.15f), base_key_size,
-                input.is_pressed(Keys.NumPad4) ? Color.Black : Color.White,
+                InputPolling.is_pressed(Keys.NumPad4) ? Color.Black : Color.White,
                -90f); 
             n++;
             draw_input_key(Keys.NumPad5,          "5", "",        numpad_section_top_left + ((key_height + key_gap_y) * 2) + (key_gap_x * n) + (key_width * n)); n++;
             draw_input_key(Keys.NumPad6,          "6", "",        numpad_section_top_left + ((key_height + key_gap_y) * 2) + (key_gap_x * n) + (key_width * n));
             Drawing.image(tx_key_arrow,
                 numpad_section_top_left + ((key_height + key_gap_y) * 2) + (key_gap_x * n) + (key_width * n) + (Vector2.UnitY * 7f) - (Vector2.UnitX * 3f), base_key_size,
-                input.is_pressed(Keys.NumPad6) ? Color.Black : Color.White,
+                InputPolling.is_pressed(Keys.NumPad6) ? Color.Black : Color.White,
                 90f); 
             n++;
             n = 0;
@@ -478,7 +480,7 @@ namespace MGRawInputTest
             draw_input_key(Keys.NumPad2,          "2", "",        numpad_section_top_left + ((key_height + key_gap_y) * 3) + (key_gap_x * n) + (key_width * n));
             Drawing.image(tx_key_arrow,
                 numpad_section_top_left + ((key_height + key_gap_y) * 3) + (key_gap_x * n) + (key_width * n) + (key_height * 0.15f) + Vector2.UnitX, base_key_size,
-                input.is_pressed(Keys.NumPad2) ? Color.Black : Color.White,
+                InputPolling.is_pressed(Keys.NumPad2) ? Color.Black : Color.White,
                 180f); 
             n++;
             draw_input_key(Keys.NumPad3,          "3", "pgdn",    numpad_section_top_left + ((key_height + key_gap_y) * 3) + (key_gap_x * n) + (key_width * n)); n++;
@@ -493,21 +495,21 @@ namespace MGRawInputTest
         void draw_mouse() {
             Drawing.image(tx_mouse_base, mouse_position, mouse_size);
 
-            if (input_draw.is_pressed(InputStructs.MouseButtons.Left)) 
+            if (InputPolling.is_pressed(InputStructs.MouseButtons.Left)) 
                 Drawing.image(tx_mouse_left, mouse_position, mouse_size);            
-            if (input_draw.is_pressed(InputStructs.MouseButtons.Right)) 
+            if (InputPolling.is_pressed(InputStructs.MouseButtons.Right)) 
                 Drawing.image(tx_mouse_right, mouse_position, mouse_size);            
-            if (input_draw.is_pressed(InputStructs.MouseButtons.Middle)) 
+            if (InputPolling.is_pressed(InputStructs.MouseButtons.Middle)) 
                 Drawing.image(tx_mouse_middle, mouse_position, mouse_size);            
 
-            if (input_draw.is_pressed(InputStructs.MouseButtons.ScrollUp)) 
+            if (InputPolling.is_pressed(InputStructs.MouseButtons.ScrollUp)) 
                 Drawing.image(tx_mouse_scroll_up, mouse_position, mouse_size);            
-            if (input_draw.is_pressed(InputStructs.MouseButtons.ScrollDown)) 
+            if (InputPolling.is_pressed(InputStructs.MouseButtons.ScrollDown)) 
                 Drawing.image(tx_mouse_scroll_down, mouse_position, mouse_size);            
 
-            if (input_draw.is_pressed(InputStructs.MouseButtons.X1)) 
+            if (InputPolling.is_pressed(InputStructs.MouseButtons.X1)) 
                 Drawing.image(tx_mouse_xbutton1, mouse_position, mouse_size);            
-            if (input_draw.is_pressed(InputStructs.MouseButtons.X2)) 
+            if (InputPolling.is_pressed(InputStructs.MouseButtons.X2)) 
                 Drawing.image(tx_mouse_xbutton2, mouse_position, mouse_size);            
         }
 

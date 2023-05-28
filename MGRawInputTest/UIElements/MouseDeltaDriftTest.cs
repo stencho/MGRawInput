@@ -20,11 +20,10 @@ namespace MGRawInputTest.UIElements {
             enable_render_target = true;
         }
 
-        public override void update() {
-            base_update();
-            
+        public override void update() {            
             if (clicking) {
-                MonoGame_test_mouse_pos += RawInputTest.input.mouse_delta_integer.ToVector2() * 10;
+                //RESTORE THIS
+                //MonoGame_test_mouse_pos += RawInputTest.input.mouse_delta_integer.ToVector2() * 10;
             } 
             if (!mouse_down) {
                 MonoGame_test_mouse_pos = Vector2.LerpPrecise(MonoGame_test_mouse_pos, center, 25f * (float)(1000.0 / RawInputTest.target_fps / 1000.0));
@@ -40,8 +39,9 @@ namespace MGRawInputTest.UIElements {
             if (clicking) {
                 if (!was_clicking) 
                     InputPolling.hide_mouse();
-                
-                SDF.draw_centered(Drawing.sdf_circle, RawInputTest.input_draw.mouse_position - position, Vector2.One * 7f, Color.Transparent, Color.HotPink, 0.99f, 0.4f, 1f, false);
+
+                //RESTORE THIS
+                //SDF.draw_centered(Drawing.sdf_circle, RawInputTest.input_draw.mouse_position - position, Vector2.One * 7f, Color.Transparent, Color.HotPink, 0.99f, 0.4f, 1f, false);
             } 
             
             if (!mouse_down && mouse_was_down) { 

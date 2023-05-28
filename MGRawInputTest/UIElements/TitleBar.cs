@@ -19,7 +19,6 @@ namespace MGRawInputTest.UIElements
         }
 
         public override void update() {
-            base_update();
             InputPolling.moving_window = clicking;
         }
 

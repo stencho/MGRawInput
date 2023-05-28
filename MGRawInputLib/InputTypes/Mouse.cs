@@ -4,9 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MGRawInputLib.InputTypes
-{
-    internal class Mouse
-    {
+namespace MGRawInputLib.InputTypes {
+    internal class RawInputMouseState {
     }
 }
