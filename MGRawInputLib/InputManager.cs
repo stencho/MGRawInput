@@ -34,7 +34,7 @@ namespace MGRawInputLib {
                 return ret;
             } 
             set {
-                _mouse_delta_acc += value;
+                _mouse_delta_acc = value;
             } 
         }
 
@@ -46,14 +46,6 @@ namespace MGRawInputLib {
         int _scroll_delta = 0;
         int scroll_delta_last_frame = 0;
 
-        KeyboardState keyboard_state; KeyboardState keyboard_state_previous;
-
-        MouseState mouse_state; MouseState mouse_state_previous;
-
-        GamePadState gamepad_one_state; GamePadState gamepad_one_state_previous;
-        GamePadState gamepad_two_state; GamePadState gamepad_two_state_previous;
-        GamePadState gamepad_three_state; GamePadState gamepad_three_state_previous;
-        GamePadState gamepad_four_state; GamePadState gamepad_four_state_previous;
 
         public InputManager() {
             InputPolling.managers.Add(this);
@@ -61,77 +53,24 @@ namespace MGRawInputLib {
         ~InputManager() { InputPolling.managers.Remove(this); }
 
         public void update() {
-            keyboard_state_previous = keyboard_state;
-            keyboard_state = InputPolling.keyboard_state;
-            
-            mouse_state_previous = mouse_state;
-            mouse_state = InputPolling.mouse_state;
-
-            gamepad_one_state_previous = gamepad_one_state;
-            gamepad_one_state = InputPolling.gamepad_one_state;
-
-            gamepad_two_state_previous = gamepad_two_state;
-            gamepad_two_state = InputPolling.gamepad_two_state;
-
-            gamepad_three_state_previous = gamepad_three_state;
-            gamepad_three_state = InputPolling.gamepad_three_state;
-
-            gamepad_four_state_previous = gamepad_four_state;
-            gamepad_four_state = InputPolling.gamepad_four_state;
-            
-            mouse_position = mouse_state.Position.ToVector2();
-            // mouse_delta_integer = (mouse_state.Position - mouse_state_previous.Position).ToVector2();
+            mouse_position = InputPolling.cursor_pos.ToVector2();
             mouse_delta_integer = mouse_delta_accumulated;
-            scroll_value_previous = scroll_value;
-            scroll_value = mouse_state.ScrollWheelValue;
 
             scroll_delta_last_frame = _scroll_delta;
             _scroll_delta = (scroll_value - scroll_value_previous);
         }
 
         public bool is_pressed(Keys key) {
-            return keyboard_state.IsKeyDown(key);            
+            return false;
         }
         public bool was_pressed(Keys key) {
-            return keyboard_state_previous.IsKeyDown(key);
+            return false;
         }
         public bool is_pressed(MouseButtons mouse_button) {
-            switch (mouse_button) {
-                case MouseButtons.Left:
-                    return mouse_state.LeftButton == ButtonState.Pressed;
-                case MouseButtons.Right:
-                    return mouse_state.RightButton == ButtonState.Pressed;
-                case MouseButtons.Middle:
-                    return mouse_state.MiddleButton == ButtonState.Pressed;
-                case MouseButtons.X1:
-                    return mouse_state.XButton1 == ButtonState.Pressed;
-                case MouseButtons.X2:
-                    return mouse_state.XButton2 == ButtonState.Pressed;
-                case MouseButtons.ScrollUp:
-                    return _scroll_delta > 0;
-                case MouseButtons.ScrollDown:
-                    return _scroll_delta < 0;
-                default: return false;
-            }
+            return false;            
         }
         public bool was_pressed(MouseButtons mouse_button) {
-            switch (mouse_button) {
-                case MouseButtons.Left:
-                    return mouse_state_previous.LeftButton == ButtonState.Pressed;
-                case MouseButtons.Right:
-                    return mouse_state_previous.RightButton == ButtonState.Pressed;
-                case MouseButtons.Middle:
-                    return mouse_state_previous.MiddleButton == ButtonState.Pressed;
-                case MouseButtons.X1:
-                    return mouse_state_previous.XButton1 == ButtonState.Pressed;
-                case MouseButtons.X2:
-                    return mouse_state_previous.XButton2 == ButtonState.Pressed;
-                case MouseButtons.ScrollUp:
-                    return scroll_delta_last_frame > 0;
-                case MouseButtons.ScrollDown:
-                    return scroll_delta_last_frame < 0;
-                default: return false;
-            }
+            return false;
         }
 
         public bool just_pressed(Keys key) => is_pressed(key) && !was_pressed(key);        
