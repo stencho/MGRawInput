@@ -56,12 +56,12 @@ namespace MGRawInputLib {
                 RAWINPUTDEVICE[] devices = new RAWINPUTDEVICE[2];
                 devices[0].usUsage = HIDUsage.Keyboard;
                 devices[0].usUsagePage = HIDUsagePage.Generic;
-                if (!legacy) devices[0].dwFlags = RawInputDeviceFlags.NoLegacy | RawInputDeviceFlags.InputSink;
+                devices[0].dwFlags = RawInputDeviceFlags.InputSink;
                 devices[0].hwndTarget = Externs.message_window_handle;
 
                 devices[1].usUsage = HIDUsage.Mouse;
                 devices[1].usUsagePage = HIDUsagePage.Generic;
-                if (!legacy) devices[1].dwFlags = RawInputDeviceFlags.NoLegacy | RawInputDeviceFlags.InputSink;
+                devices[1].dwFlags = RawInputDeviceFlags.InputSink;
                 devices[1].hwndTarget = Externs.message_window_handle;
 
                 if (RegisterRawInputDevices(devices, 2, Marshal.SizeOf(typeof(RAWINPUTDEVICE)))) {

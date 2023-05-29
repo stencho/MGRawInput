@@ -87,18 +87,6 @@ namespace MGRawInputLib {
         public static void hide_mouse() { parent.IsMouseVisible = false; }
         public static void show_mouse() { parent.IsMouseVisible = true; }
 
-        public static bool moving_window { 
-            get { 
-                return _mv_wnd;  
-            } set {
-                if (_mv_wnd != value && value)
-                    relative_mouse = Externs.get_cursor_pos() - parent.Window.ClientBounds.Location;
-
-                _mv_wnd = value;
-            }
-        } static bool _mv_wnd = false;
-
-        public static Point relative_mouse;
 
         static void update() {
             while (run_thread) {
@@ -141,18 +129,7 @@ namespace MGRawInputLib {
                     Mouse.SetPosition(pre_lock_mouse_pos.X, pre_lock_mouse_pos.Y);
                 }
 
-                if (moving_window) {
-                    var rec = Externs.get_window_rect();
-                    var cp = Externs.get_cursor_pos();
-
-                    if (mouse_delta.X != 0 || mouse_delta.Y != 0) {
-                        Externs.MoveWindow(Externs.actual_window_handle,
-                            cp.X - relative_mouse.X,
-                            cp.Y - relative_mouse.Y,
-                            rec.Width, rec.Height, false);                        
-                    }
-                }
-                
+                Window.update();                
 
                 was_active = parent.IsActive;
                 _was_locked = lock_mouse;

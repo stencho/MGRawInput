@@ -19,7 +19,7 @@ namespace MGRawInputTest.UIElements
         }
 
         public override void update() {
-            Input.moving_window = clicking;
+            Window.moving_window = clicking;
         }
 
         public override void draw() {
