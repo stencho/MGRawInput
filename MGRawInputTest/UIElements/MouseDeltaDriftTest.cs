@@ -19,15 +19,22 @@ namespace MGRawInputTest.UIElements {
             RawInput_test_mouse_pos = center;
             enable_render_target = true;
         }
+        InputHandler inputh = new InputHandler();
+        public override void update() {
+            inputh.update();
 
-        public override void update() {            
             if (clicking) {
-                //RESTORE THIS
-                //MonoGame_test_mouse_pos += RawInputTest.input.mouse_delta_integer.ToVector2() * 10;
+                MonoGame_test_mouse_pos += inputh.mouse_delta.ToVector2();
             } 
             if (!mouse_down) {
                 MonoGame_test_mouse_pos = Vector2.LerpPrecise(MonoGame_test_mouse_pos, center, 25f * (float)(1000.0 / RawInputTest.target_fps / 1000.0));
                 RawInput_test_mouse_pos = Vector2.LerpPrecise(RawInput_test_mouse_pos, center, 25f * (float)(1000.0 / RawInputTest.target_fps / 1000.0));
+            }
+            if (clicking && !was_clicking) {
+                Input.lock_mouse = true;
+            }
+            if (!mouse_down && mouse_was_down) {
+                Input.lock_mouse = false;            
             }
         }
 
@@ -37,24 +44,15 @@ namespace MGRawInputTest.UIElements {
             SDF.draw_centered(Drawing.sdf_circle, MonoGame_test_mouse_pos, Vector2.One * 7f, Color.MonoGameOrange);
             SDF.draw_centered(Drawing.sdf_circle, RawInput_test_mouse_pos, Vector2.One * 7f, Color.LightBlue);
             if (clicking) {
-                if (!was_clicking) 
-                    Input.hide_mouse();
-
-                //RESTORE THIS
-                //SDF.draw_centered(Drawing.sdf_circle, RawInputTest.input_draw.mouse_position - position, Vector2.One * 7f, Color.Transparent, Color.HotPink, 0.99f, 0.4f, 1f, false);
+                SDF.draw_centered(Drawing.sdf_circle, inputh.mouse_position - position, 
+                    Vector2.One * 7f, Color.Transparent, Color.HotPink, 0.99f, 0.4f, 1f, false);
             } 
             
-            if (!mouse_down && mouse_was_down) { 
-                Input.show_mouse();
-            }
         }
 
         public override void draw() {
             Drawing.image(draw_target, position, size);
             Drawing.rect(position, position + size, Color.White, 1f);
-            Drawing.text("MonoGame", position + Vector2.One * 3f, Color.MonoGameOrange);
-            Drawing.text("RawInput", position + Vector2.One * 3f + (Drawing.measure_string_profont("MonoGame vs ").X_only()), Color.LightBlue);
-            Drawing.text(" vs          mouse delta * 10", position + Vector2.One * 3f + (Drawing.measure_string_profont("MonoGame").X_only()), Color.White);            
         }
 
     }

@@ -22,9 +22,6 @@ namespace MGRawInputTest {
         
         FPSCounter fps;
 
-        public static InputHandler input = new InputHandler();
-        public static InputHandler input_draw = new InputHandler();
-
         public static Vector2 resolution = new Vector2(850, 600);
 
         Texture2D tx_key_arrow;
@@ -90,12 +87,6 @@ namespace MGRawInputTest {
             build_UI();
 
             SDF.load(Content);
-            
-
-
-            //host.GetType().BaseType.GetField("Suspend", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(host, null);
-            //host.GetType().BaseType.GetField("Resume", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(host, null);
-
         }
 
         protected void build_UI() {
@@ -112,28 +103,30 @@ namespace MGRawInputTest {
                 UIExterns.minimize_window();
             };
 
-
             ui.add_element("title_bar", new TitleBar(Vector2.Zero, new Vector2(resolution.X - ((ui.elements["exit_button"].width*2)), top_bar_height)));
 
             ui.add_element("mouse_delta", new MouseDeltaDisplay(
                 mouse_position + (mouse_size / 2f) + Vector2.UnitX + (Vector2.UnitY * 5f), Vector2.One * 60f));
-            ((MouseDeltaDisplay)ui.elements["mouse_delta"]).set_input_manager(input_draw);
 
-            ui.add_element("method_switch", new Button("MonoGame", Vector2.UnitX * 100));
+            ui.add_element("method_switch", new Button("RawInput", Vector2.UnitX * 100));
+            ((Button)ui.elements["method_switch"]).color_foreground = Color.LightBlue;
             ((Button)ui.elements["method_switch"]).click_action = () => {
+                //switch to monogame
                 if (Input.poll_method == Input.input_method.RawInput) {
                     Input.change_polling_method(Input.input_method.MonoGame);
                     ((Button)ui.elements["method_switch"]).change_text("MonoGame");
-                } else {
+                    ((Button)ui.elements["method_switch"]).color_foreground = Color.MonoGameOrange;
+
+                //switch to rawinput
+                } else if (Input.poll_method == Input.input_method.MonoGame) {
                     Input.change_polling_method(Input.input_method.RawInput);
                     ((Button)ui.elements["method_switch"]).change_text("RawInput");
+                    ((Button)ui.elements["method_switch"]).color_foreground = Color.LightBlue;
                 }
             };
         }
 
         protected override void Update(GameTime gameTime) {
-            input.update();
-
             StringBuilder sb = new StringBuilder();
 
             string title_text = $"{UIExterns.get_window_title()}";
@@ -152,19 +145,17 @@ namespace MGRawInputTest {
         static Vector2 bottom_section_size => new Vector2(resolution.X, resolution.Y - top_section_size.Y);
 
         protected override void Draw(GameTime gameTime) {
-            input_draw.update();
-
             GraphicsDevice.Clear(Color.Black);
-            
-            ui.draw();
+
 
             Drawing.rect(Vector2.UnitX, (Vector2.UnitY * top_bar_height) + (Vector2.UnitX * resolution.X), Color.White, 1f);
-            Drawing.rect(Vector2.UnitX, top_section_size - Vector2.UnitY, Color.White, 1f); 
+            Drawing.rect(Vector2.UnitX, top_section_size - Vector2.UnitY, Color.White, 1f);
+
+            ui.draw();
             Drawing.rect(Vector2.Zero, resolution, Color.White, 2f);
-         
+
             draw_keyboard();
             draw_mouse();
-
 
             Drawing.text($"[{Input.RAWINPUT_DEBUG_STRING}]", Vector2.UnitX * 200 + (Vector2.One * 3f), Color.White);
 
@@ -248,14 +239,16 @@ namespace MGRawInputTest {
         void draw_input_key(Keys key, string key_string_top, string key_string_bottom, Vector2 position, Vector2 size, align_text alignment) {
             bool invert_text = false;
 
-            /*if (input.just_pressed(key)) {
-                Drawing.fill_rect(position, size.X, size.Y, Color.HotPink);
-            } else if (input_draw.just_pressed(key)) {
-                Drawing.fill_rect(position, size.X, size.Y, Color.Red);
-            } else*/
-            if (Input.is_pressed(key)) {
-                Drawing.fill_rect(position, size.X, size.Y, Color.White);
-                invert_text = true;
+            if (Input.poll_method == Input.input_method.MonoGame) {
+                if (Input.keyboard_state.IsKeyDown(key)) {
+                    Drawing.fill_rect(position, size.X, size.Y, Color.MonoGameOrange);
+                    invert_text = true;
+                }
+            } else if (Input.poll_method == Input.input_method.RawInput) {
+                if (Input.ri_keyboard_state.IsKeyDown(key)) {
+                    Drawing.fill_rect(position, size.X, size.Y, Color.LightBlue);
+                    invert_text = true;
+                }
             }
 
             Drawing.rect(position, size.X, size.Y, Color.White, 1f);
@@ -486,25 +479,30 @@ namespace MGRawInputTest {
 
         Vector2 mouse_position => numpad_section_top_right + (section_gap*2) - (base_key_size.Y_only());
         Vector2 mouse_size => new Vector2(91, 153);
+        
+        InputHandler mousehandler = new InputHandler();
         void draw_mouse() {
+            mousehandler.update();
+            Color c = Input.poll_method == Input.input_method.RawInput ? Color.LightBlue : Color.MonoGameOrange;
+
+            if (Input.is_pressed(InputStructs.MouseButtons.Left))
+                Drawing.image(tx_mouse_left, mouse_position, mouse_size, c);
+            if (Input.is_pressed(InputStructs.MouseButtons.Right))
+                Drawing.image(tx_mouse_right, mouse_position, mouse_size, c);
+            if (Input.is_pressed(InputStructs.MouseButtons.Middle))
+                Drawing.image(tx_mouse_middle, mouse_position, mouse_size, c);
+
+            if (Input.is_pressed(InputStructs.MouseButtons.ScrollUp))
+                Drawing.image(tx_mouse_scroll_up, mouse_position, mouse_size, c);
+            if (Input.is_pressed(InputStructs.MouseButtons.ScrollDown))
+                Drawing.image(tx_mouse_scroll_down, mouse_position, mouse_size, c);
+
+            if (Input.is_pressed(InputStructs.MouseButtons.X1))
+                Drawing.image(tx_mouse_xbutton1, mouse_position, mouse_size, c);
+            if (Input.is_pressed(InputStructs.MouseButtons.X2))
+                Drawing.image(tx_mouse_xbutton2, mouse_position, mouse_size, c);
+
             Drawing.image(tx_mouse_base, mouse_position, mouse_size);
-
-            if (Input.is_pressed(InputStructs.MouseButtons.Left)) 
-                Drawing.image(tx_mouse_left, mouse_position, mouse_size);            
-            if (Input.is_pressed(InputStructs.MouseButtons.Right)) 
-                Drawing.image(tx_mouse_right, mouse_position, mouse_size);            
-            if (Input.is_pressed(InputStructs.MouseButtons.Middle)) 
-                Drawing.image(tx_mouse_middle, mouse_position, mouse_size);            
-
-            if (Input.is_pressed(InputStructs.MouseButtons.ScrollUp)) 
-                Drawing.image(tx_mouse_scroll_up, mouse_position, mouse_size);            
-            if (Input.is_pressed(InputStructs.MouseButtons.ScrollDown)) 
-                Drawing.image(tx_mouse_scroll_down, mouse_position, mouse_size);            
-
-            if (Input.is_pressed(InputStructs.MouseButtons.X1)) 
-                Drawing.image(tx_mouse_xbutton1, mouse_position, mouse_size);            
-            if (Input.is_pressed(InputStructs.MouseButtons.X2)) 
-                Drawing.image(tx_mouse_xbutton2, mouse_position, mouse_size);            
         }
 
     }

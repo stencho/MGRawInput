@@ -57,7 +57,7 @@ namespace MGRawInputTest {
         public abstract void update();
         public abstract void draw();
         public abstract void draw_rt();
-        internal void base_update() {
+        internal bool click_update() {
             mouse_over = Collision2D.v2_intersects_rect(Input.cursor_pos.ToVector2(), position, position + (size - Vector2.One));
 
             mouse_was_down = mouse_down;
@@ -70,10 +70,13 @@ namespace MGRawInputTest {
 
             if (!UIExterns.in_foreground()) {
                 clicking = false;
-                return;
+                return false;
             }
+
             if (clicking && !mouse_down) clicking = false;
             if (mouse_over && mouse_down && !mouse_was_down) clicking = true;
+            
+            return (mouse_over && mouse_down && !mouse_was_down);
         }
     }
 }

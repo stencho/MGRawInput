@@ -196,6 +196,23 @@ namespace MGRawInputTest {
         }
 
 
+        public static void image(Texture2D image, Vector2 position, Vector2 size, int source_rect_x, int source_rect_y, int source_rect_w, int source_rect_h) {
+            begin();
+            sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), 
+                new Rectangle(source_rect_x, source_rect_y, source_rect_w, source_rect_h), 
+                Color.White);
+        }
+
+        public static void image(Texture2D image, Vector2 position, Vector2 size, Vector2 fractional_source_rect_pos, Vector2 fractional_source_rect_size) {
+            begin();
+            sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()),
+                new Rectangle(
+                    (int)(image.Width * fractional_source_rect_pos.X), (int)(image.Height * fractional_source_rect_pos.Y),
+                    (int)(image.Width * fractional_source_rect_size.X), (int)(image.Height * fractional_source_rect_size.Y)),
+                Color.White);
+        }
+
+
         public static void text(string text, Vector2 position, Color color) {
             begin();
             sb.DrawString(fnt_profont, text, position, color);            

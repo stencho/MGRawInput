@@ -15,12 +15,12 @@ namespace MGRawInputTest.UIElements {
             this.position = position;
             this.size = size;
         }
-        InputHandler input;
-        public void set_input_manager(InputHandler input) { this.input = input; }
+        InputHandler input = new InputHandler();
+        
         public override void update() {
-            //RESTORE THIS
+            input.update();
             if (input != null)
-                base_delta = input.mouse_delta_integer.ToVector2();
+                base_delta = input.mouse_delta.ToVector2();
         }
 
         public override void draw() {
