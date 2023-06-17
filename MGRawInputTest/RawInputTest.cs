@@ -90,7 +90,7 @@ namespace MGRawInputTest {
         }
 
         protected void build_UI() {
-            ui.add_element("mouse_drift", new MouseDeltaDriftTest(bottom_section_top_left + (Vector2.One * 3) + (Vector2.UnitX * 2f), new Vector2((bottom_section_size.X / 2f) - 3, bottom_section_size.Y - 8f)));
+            ui.add_element("mouse_drift", new MouseDeltaDriftTest(bottom_section_top_left + (Vector2.One * 3) + (Vector2.UnitX * 2f), new Vector2((bottom_section_size.X) - 9, bottom_section_size.Y - 8f)));
 
             var tl = Drawing.measure_string_profont("x") ;
             ui.add_element("exit_button", new Button("x", resolution.X_only() - tl.X_only() - (Vector2.UnitX * 10f)));
@@ -147,11 +147,10 @@ namespace MGRawInputTest {
         protected override void Draw(GameTime gameTime) {
             GraphicsDevice.Clear(Color.Black);
 
+            ui.draw();
 
             Drawing.rect(Vector2.UnitX, (Vector2.UnitY * top_bar_height) + (Vector2.UnitX * resolution.X), Color.White, 1f);
             Drawing.rect(Vector2.UnitX, top_section_size - Vector2.UnitY, Color.White, 1f);
-
-            ui.draw();
             Drawing.rect(Vector2.Zero, resolution, Color.White, 2f);
 
             draw_keyboard();

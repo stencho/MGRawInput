@@ -11,11 +11,12 @@ namespace MGRawInputTest.UIElements {
     internal class MouseDeltaDisplay : UIElement {
         Vector2 base_delta;
 
+        InputHandler input = new InputHandler();
+
         public MouseDeltaDisplay(Vector2 position, Vector2 size) : base(position, size) {
             this.position = position;
             this.size = size;
         }
-        InputHandler input = new InputHandler();
         
         public override void update() {
             input.update();

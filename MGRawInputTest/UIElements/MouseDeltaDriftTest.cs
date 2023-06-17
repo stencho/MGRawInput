@@ -14,12 +14,14 @@ namespace MGRawInputTest.UIElements {
         Vector2 MonoGame_test_mouse_pos;
         Vector2 RawInput_test_mouse_pos;
 
+        InputHandler inputh = new InputHandler();
+
         public MouseDeltaDriftTest(Vector2 position, Vector2 size) : base(position, size) {
             MonoGame_test_mouse_pos = center;
             RawInput_test_mouse_pos = center;
             enable_render_target = true;
         }
-        InputHandler inputh = new InputHandler();
+
         public override void update() {
             inputh.update();
 
@@ -42,12 +44,7 @@ namespace MGRawInputTest.UIElements {
             Drawing.graphics_device.Clear(Color.Black);
             //SDF.draw_centered(Drawing.sdf_circle, center, Vector2.One * 7f, Color.White);
             SDF.draw_centered(Drawing.sdf_circle, MonoGame_test_mouse_pos, Vector2.One * 7f, Color.MonoGameOrange);
-            SDF.draw_centered(Drawing.sdf_circle, RawInput_test_mouse_pos, Vector2.One * 7f, Color.LightBlue);
-            if (clicking) {
-                SDF.draw_centered(Drawing.sdf_circle, inputh.mouse_position - position, 
-                    Vector2.One * 7f, Color.Transparent, Color.HotPink, 0.99f, 0.4f, 1f, false);
-            } 
-            
+            SDF.draw_centered(Drawing.sdf_circle, RawInput_test_mouse_pos, Vector2.One * 7f, Color.LightBlue);            
         }
 
         public override void draw() {

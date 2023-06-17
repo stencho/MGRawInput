@@ -45,7 +45,6 @@ namespace MGRawInputLib {
         int _scroll_delta = 0;
         int scroll_delta_last_frame = 0;
 
-
         public InputHandler() {
             Input.handlers.Add(this);
         }

@@ -116,9 +116,12 @@ namespace MGRawInputLib {
                     mouse_state_previous = mouse_state;
                     mouse_state = Mouse.GetState();
 
-                    mouse_delta = (mouse_state.Position - mouse_state_previous.Position);
+                    if (!lock_mouse) mouse_delta = (mouse_state.Position - mouse_state_previous.Position);
+                    else mouse_delta = (mouse_state.Position - new Point(parent.Window.ClientBounds.Size.X / 2, parent.Window.ClientBounds.Size.Y / 2));
 
-                    foreach (InputHandler handler in handlers) handler.mouse_delta_accumulated += (mouse_state.Position - mouse_state_previous.Position);
+                    if (lock_mouse && !_was_locked) mouse_delta = Point.Zero;
+
+                    foreach (InputHandler handler in handlers) handler.mouse_delta_accumulated += mouse_delta;
 
                     gamepad_one_state = GamePad.GetState(PlayerIndex.One);
                     gamepad_two_state = GamePad.GetState(PlayerIndex.Two);
