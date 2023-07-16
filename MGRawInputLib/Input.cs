@@ -15,7 +15,7 @@ namespace MGRawInputLib {
         public static List<InputHandler> handlers = new List<InputHandler>();
         static Game parent;
 
-        public static void kill() { run_thread = false; }
+        public static void end() { run_thread = false; }
 
         public static bool num_lock => keyboard_state.NumLock;
         public static bool caps_lock => keyboard_state.CapsLock;
