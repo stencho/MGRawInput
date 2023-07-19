@@ -25,6 +25,12 @@ namespace MGRawInputLib {
     public class InputHandler {
         public Point mouse_delta { get; private set; }
 
+        KeyboardState key_state;
+        KeyboardState key_state_previous;
+
+        public RawInputKeyboardState rawinput_key_state;
+        public RawInputKeyboardState rawinput_key_state_previous;
+
         Point _mouse_delta_acc = Point.Zero;
         internal Point mouse_delta_accumulated { 
             get {
@@ -47,23 +53,40 @@ namespace MGRawInputLib {
 
         public InputHandler() {
             Input.handlers.Add(this);
+            rawinput_key_state_previous = RawInputKeyboard.GetState();
+            rawinput_key_state = RawInputKeyboard.GetState();
         }
         ~InputHandler() { Input.handlers.Remove(this); }
-
+        
         public void update() {
+            if (Input.poll_method == Input.input_method.MonoGame) {
+                key_state_previous = key_state;
+                key_state = Input.keyboard_state;
+            } else {
+                rawinput_key_state_previous = rawinput_key_state;
+                rawinput_key_state = Input.ri_keyboard_state;              
+            }
+
             mouse_position = Input.cursor_pos.ToVector2();
             mouse_delta = mouse_delta_accumulated;
 
             scroll_delta_last_frame = _scroll_delta;
-            _scroll_delta = (scroll_value - scroll_value_previous);
-            
+            _scroll_delta = (scroll_value - scroll_value_previous);            
         }
 
         public bool is_pressed(Keys key) {
-            return false;
+            if (Input.poll_method == Input.input_method.MonoGame) {
+                return key_state.IsKeyDown(key);
+            } else {
+                return rawinput_key_state.IsKeyDown(key);
+            }
         }
         public bool was_pressed(Keys key) {
-            return false;
+            if (Input.poll_method == Input.input_method.MonoGame) {
+                return key_state_previous.IsKeyDown(key);
+            } else {
+                return rawinput_key_state_previous.IsKeyDown(key);
+            }
         }
         public bool is_pressed(MouseButtons mouse_button) {
             return false;            
@@ -79,3 +102,4 @@ namespace MGRawInputLib {
         public bool just_released(MouseButtons mouse_button) => !is_pressed(mouse_button) && was_pressed(mouse_button);
     }
 }
+

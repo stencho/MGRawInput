@@ -21,7 +21,7 @@ namespace MGRawInputLib {
         }
     
         public static RawInputKeyboardState GetState() {
-            return keyboard_state.GetState();
+            return new RawInputKeyboardState(keyboard_state.pressed_keys);
         }        
     }
 
@@ -30,17 +30,24 @@ namespace MGRawInputLib {
         public bool NumLock => (Externs.GetKeyState(Externs.vk_states.VK_NUMLOCK) & 0xFFFF) != 0;
         public bool ScrollLock => (Externs.GetKeyState(Externs.vk_states.VK_SCROLL) & 0xFFFF) != 0;
 
-        internal HashSet<Keys> pressed_keys = new HashSet<Keys>();
+        public HashSet<Keys> pressed_keys = new HashSet<Keys>();
 
         public RawInputKeyboardState() { }
-        public RawInputKeyboardState(HashSet<Keys> keys) { pressed_keys = keys; }
+        public RawInputKeyboardState(HashSet<Keys> keys) { foreach (Keys k in keys) pressed_keys.Add(k); }
 
         public Keys[] GetPressedKeys() { return pressed_keys.ToArray(); }
                         
         public bool IsKeyUp(Keys key) => !pressed_keys.Contains(key);
         public bool IsKeyDown(Keys key) => pressed_keys.Contains(key);
 
-        internal RawInputKeyboardState GetState() => new RawInputKeyboardState(pressed_keys);        
+        internal RawInputKeyboardState GetState() => (RawInputKeyboardState)MemberwiseClone();
+        
+        public string list_keys() {
+            if (pressed_keys == null) return "";
+            StringBuilder sb = new StringBuilder();
+            foreach(Keys key in pressed_keys) { sb.AppendLine(key.ToString()); }
+            return sb.ToString();
+        }
     }
 
     //awful awful function to simply switch between VirtualKeys and MonoGame Keys
