@@ -33,7 +33,8 @@ namespace MGRawInputLib {
         public HashSet<Keys> pressed_keys = new HashSet<Keys>();
 
         public RawInputKeyboardState() { }
-        public RawInputKeyboardState(HashSet<Keys> keys) { foreach (Keys k in keys) pressed_keys.Add(k); }
+        public RawInputKeyboardState(HashSet<Keys> keys) { pressed_keys = new HashSet<Keys>(keys); }
+        public RawInputKeyboardState(Keys[] keys) { pressed_keys = new HashSet<Keys>(keys); }
 
         public Keys[] GetPressedKeys() { return pressed_keys.ToArray(); }
                         
