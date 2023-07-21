@@ -1601,7 +1601,7 @@ namespace MGRawInputLib {
         }
     }
 
-    internal static class Externs {
+    public static class Externs {
         internal static class RawInput {
             [DllImport("user32.dll")] public static extern bool RegisterRawInputDevices([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)] RawInputDevice[] pRawInputDevices, int uiNumDevices, int cbSize);
             [DllImport("user32.dll")] public static extern int GetRawInputData(IntPtr hRawInput, RawInputCommand uiCommand, out RAWINPUT pData, ref int pcbSize, int cbSizeHeader);
