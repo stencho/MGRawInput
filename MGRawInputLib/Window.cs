@@ -11,7 +11,6 @@ namespace MGRawInputLib {
         static Point relative_mouse;
 
         public static Action<Point>? resize_start;
-        public static Action<Point>? resize;
         public static Action<Point>? resize_end;
 
         public static Rectangle window_rect = Rectangle.Empty;
@@ -20,20 +19,19 @@ namespace MGRawInputLib {
             window_rect = Externs.get_window_rect();
             var cp = Externs.get_cursor_pos();            
 
-            if (moving_window) {
+            if (moving_window && Input.is_pressed(InputStructs.MouseButtons.Left)) {
                 if (Input.mouse_delta.X != 0 || Input.mouse_delta.Y != 0) {
                     Externs.MoveWindow(Externs.actual_window_handle,
                         cp.X - relative_mouse.X,
                         cp.Y - relative_mouse.Y,
                         window_rect.Width, window_rect.Height, false);
                 }
-            } else if (resizing_window) {
+            } else if (resizing_window && Input.is_pressed(InputStructs.MouseButtons.Left)) {
                 if (Input.mouse_delta.X != 0 || Input.mouse_delta.Y != 0) {
                     Externs.MoveWindow(Externs.actual_window_handle,
                         window_rect.X, window_rect.Y,
                     start_size.X - (relative_mouse.X - (cp.X - window_rect.X)), 
                     start_size.Y - (relative_mouse.Y - (cp.Y - window_rect.Y)), false);
-                    if (resize != null) resize(window_rect.Size);
                 }
             }
         }
@@ -64,7 +62,7 @@ namespace MGRawInputLib {
                 return _mv_wnd;
             }
             set {
-                if (_mv_wnd != value && value)
+                if (_mv_wnd == false && value == true)
                     relative_mouse = Externs.get_cursor_pos() - Externs.get_window_pos();
 
                 _mv_wnd = value;
