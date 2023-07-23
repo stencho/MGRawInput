@@ -1665,15 +1665,15 @@ namespace MGRawInputLib {
 
             internal delegate nint wnd_proc_func(nint hWnd, uint msg, nint wParam, nint lParam);
 
+            static RAWINPUT data;
             internal static nint wnd_proc(nint hWnd, uint msg, nint wParam, nint lParam) {
                 if (!enable) goto ret;
                 if (msg == (uint)WM.INPUT) {
                     int size=0;
                     unsafe {
 
-                        RAWINPUT data;
                         GetRawInputData(lParam, RawInputCommand.Input, out _, ref size, sizeof(RawInputHeader));
-                        data = new RAWINPUT();
+                        //data = new RAWINPUT();
 
                         if (GetRawInputData(lParam, RawInputCommand.Input, out data, ref size, sizeof(RawInputHeader)) == -1) {
                             Input.RAWINPUT_DEBUG_STRING = new Win32Exception(GetLastError()).Message;
@@ -1787,6 +1787,14 @@ namespace MGRawInputLib {
         [DllImport("user32.dll")][return: MarshalAs(UnmanagedType.Bool)] static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
         [DllImport("user32.dll")] static extern bool GetCursorPos(out System.Drawing.Point lpPoint);
         [DllImport("user32.dll")] static extern bool SetCursorPos(int X, int Y);
+
+        [DllImport("user32.dll")] static extern nint WindowFromPoint(System.Drawing.Point Point);
+
+        public static bool window_under_cursor() {
+            System.Drawing.Point cp;
+            GetCursorPos(out cp);
+            return WindowFromPoint(cp) == actual_window_handle;
+        }
 
         public static Microsoft.Xna.Framework.Rectangle get_window_rect() {
             RECT rect; GetWindowRect(actual_window_handle, out rect);

@@ -39,7 +39,7 @@ namespace MGRawInputLib {
         public Keys[] GetPressedKeys() { return pressed_keys.ToArray(); }
                         
         public bool IsKeyUp(Keys key) => !pressed_keys.Contains(key);
-        public bool IsKeyDown(Keys key) => pressed_keys.Contains(key);
+        public bool IsKeyDown(Keys key) => pressed_keys.Contains(key) && Window.is_active;
 
         internal RawInputKeyboardState GetState() => new RawInputKeyboardState(pressed_keys);
         

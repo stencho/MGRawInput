@@ -8,6 +8,8 @@ using static MGRawInputLib.Externs;
 
 namespace MGRawInputLib {
     public static class Window {
+        public static bool is_active = false;
+        public static bool mouse_over_window = false;
         static Point relative_mouse;
 
         public static Action<Point>? resize_start;
@@ -17,8 +19,8 @@ namespace MGRawInputLib {
 
         public static void update() {
             window_rect = Externs.get_window_rect();
-            var cp = Externs.get_cursor_pos();            
-
+            var cp = Externs.get_cursor_pos();
+            mouse_over_window = Externs.window_under_cursor();
             if (moving_window && Input.is_pressed(InputStructs.MouseButtons.Left)) {
                 if (Input.mouse_delta.X != 0 || Input.mouse_delta.Y != 0) {
                     Externs.MoveWindow(Externs.actual_window_handle,
