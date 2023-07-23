@@ -38,7 +38,7 @@ namespace MGRawInputLib {
         public RawInputMouseState rawinput_mouse_state_previous;
 
         Point _mouse_delta_acc = Point.Zero;
-        internal Point mouse_delta_accumulated { 
+        Point mouse_delta_accumulated { 
             get {
                 var ret = _mouse_delta_acc;
                 _mouse_delta_acc = Point.Zero;
@@ -51,9 +51,23 @@ namespace MGRawInputLib {
 
         public Vector2 mouse_position { get; private set; }
 
-        public int scroll_delta;
-        internal bool pulled_data = false;
-
+        int _scroll_delta_acc;
+        int scroll_delta_accumulated {
+            get {
+                var ret = _scroll_delta_acc;
+                _scroll_delta_acc = 0;
+                return ret;
+            } 
+            set {
+                _scroll_delta_acc = value;
+            }
+        }
+        public void accumulate_scroll_delta(int a) {
+            _scroll_delta_acc += a;
+        }
+        public void accumulate_mouse_delta(Point p) {
+            _mouse_delta_acc += p;
+        }
         public InputHandler() {
             Input.handlers.Add(this);
 
@@ -82,13 +96,14 @@ namespace MGRawInputLib {
                 rawinput_mouse_state_previous = rawinput_mouse_state;
                 rawinput_mouse_state = Input.ri_mouse_state;
 
-                rawinput_mouse_state.ScrollDelta = scroll_delta;
-                scroll_delta = 0;
-                pulled_data = true;
             }
 
             mouse_position = Input.cursor_pos.ToVector2();
-            mouse_delta = mouse_delta_accumulated; 
+
+            mouse_delta = mouse_delta_accumulated;
+
+            rawinput_mouse_state.Delta = mouse_delta;
+            rawinput_mouse_state.ScrollDelta = scroll_delta_accumulated;
         }
 
         public bool is_pressed(Keys key) {
