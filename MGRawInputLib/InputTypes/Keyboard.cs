@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Input;
 using static MGRawInputLib.RawInputTypes;
@@ -46,7 +47,9 @@ namespace MGRawInputLib {
         public string list_keys() {
             if (pressed_keys == null) return "";
             StringBuilder sb = new StringBuilder();
-            foreach(Keys key in pressed_keys) { sb.AppendLine(key.ToString()); }
+            foreach(Keys key in pressed_keys) { sb.Append(key.ToString()); sb.Append(", "); }
+            if (sb.Length > 0)
+                sb.Remove(sb.Length - 2, 2);
             return sb.ToString();
         }
     }

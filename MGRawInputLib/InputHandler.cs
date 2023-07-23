@@ -31,6 +31,12 @@ namespace MGRawInputLib {
         public RawInputKeyboardState rawinput_key_state;
         public RawInputKeyboardState rawinput_key_state_previous;
 
+        MouseState mouse_state;
+        MouseState mouse_state_previous;
+
+        public RawInputMouseState rawinput_mouse_state;
+        public RawInputMouseState rawinput_mouse_state_previous;
+
         Point _mouse_delta_acc = Point.Zero;
         internal Point mouse_delta_accumulated { 
             get {
@@ -44,34 +50,45 @@ namespace MGRawInputLib {
         }
 
         public Vector2 mouse_position { get; private set; }
-        public int scroll_value { get; private set; }
-        int scroll_value_previous;
 
-        public int scroll_delta => _scroll_delta;
-        int _scroll_delta = 0;
-        int scroll_delta_last_frame = 0;
+        public int scroll_delta;
+        internal bool pulled_data = false;
 
         public InputHandler() {
             Input.handlers.Add(this);
+
             rawinput_key_state_previous = RawInputKeyboard.GetState();
             rawinput_key_state = RawInputKeyboard.GetState();
         }
+
         ~InputHandler() { Input.handlers.Remove(this); }
-        
+
+        public string ri_info() {
+            return $"[keyboard] -> {rawinput_key_state.list_keys()}\n[mouse] -> {rawinput_mouse_state.info()}";
+        }
+
         public void update() {
             if (Input.poll_method == Input.input_method.MonoGame) {
                 key_state_previous = key_state;
                 key_state = Input.keyboard_state;
+
+                mouse_state_previous = mouse_state;
+                mouse_state = Input.mouse_state;
+
             } else {
                 rawinput_key_state_previous = rawinput_key_state;
-                rawinput_key_state = Input.ri_keyboard_state;              
+                rawinput_key_state = Input.ri_keyboard_state;      
+                
+                rawinput_mouse_state_previous = rawinput_mouse_state;
+                rawinput_mouse_state = Input.ri_mouse_state;
+
+                rawinput_mouse_state.ScrollDelta = scroll_delta;
+                scroll_delta = 0;
+                pulled_data = true;
             }
 
             mouse_position = Input.cursor_pos.ToVector2();
-            mouse_delta = mouse_delta_accumulated;
-
-            scroll_delta_last_frame = _scroll_delta;
-            _scroll_delta = (scroll_value - scroll_value_previous);            
+            mouse_delta = mouse_delta_accumulated; 
         }
 
         public bool is_pressed(Keys key) {
@@ -88,10 +105,82 @@ namespace MGRawInputLib {
                 return rawinput_key_state_previous.IsKeyDown(key);
             }
         }
+
         public bool is_pressed(MouseButtons mouse_button) {
-            return false;            
+            if (Input.poll_method == Input.input_method.MonoGame) {
+                switch (mouse_button) {
+                    case MouseButtons.Left:
+                        return mouse_state.LeftButton == ButtonState.Pressed;                        
+                    case MouseButtons.Right:
+                        return mouse_state.RightButton == ButtonState.Pressed;
+                    case MouseButtons.Middle:
+                        return mouse_state.MiddleButton == ButtonState.Pressed;
+                    case MouseButtons.X1:
+                        return mouse_state.XButton1 == ButtonState.Pressed;
+                    case MouseButtons.X2:
+                        return mouse_state.XButton2 == ButtonState.Pressed;
+                    case MouseButtons.ScrollUp:
+                        return mouse_state.ScrollWheelValue > mouse_state_previous.ScrollWheelValue;
+                    case MouseButtons.ScrollDown:
+                        return mouse_state.ScrollWheelValue < mouse_state_previous.ScrollWheelValue;
+                }
+            } else {
+                switch (mouse_button) {
+                    case MouseButtons.Left:
+                        return rawinput_mouse_state.LeftButton;                        
+                    case MouseButtons.Right:
+                        return rawinput_mouse_state.RightButton;
+                    case MouseButtons.Middle:
+                        return rawinput_mouse_state.MiddleButton;
+                    case MouseButtons.X1:
+                        return rawinput_mouse_state.XButton1;
+                    case MouseButtons.X2:
+                        return rawinput_mouse_state.XButton2;
+                    case MouseButtons.ScrollUp:
+                        return rawinput_mouse_state.ScrollUp;
+                    case MouseButtons.ScrollDown:
+                        return rawinput_mouse_state.ScrollDown;
+                }
+            }
+            return false;
         }
+
         public bool was_pressed(MouseButtons mouse_button) {
+            if (Input.poll_method == Input.input_method.MonoGame) {
+                switch (mouse_button) {
+                    case MouseButtons.Left:
+                        return mouse_state_previous.LeftButton == ButtonState.Pressed;
+                    case MouseButtons.Right:
+                        return mouse_state_previous.RightButton == ButtonState.Pressed;
+                    case MouseButtons.Middle:
+                        return mouse_state_previous.MiddleButton == ButtonState.Pressed;
+                    case MouseButtons.X1:
+                        return mouse_state_previous.XButton1 == ButtonState.Pressed;
+                    case MouseButtons.X2:
+                        return mouse_state_previous.XButton2 == ButtonState.Pressed;
+                    case MouseButtons.ScrollUp:
+                        return false;
+                    case MouseButtons.ScrollDown:
+                        return false;
+                }
+            } else {
+                switch (mouse_button) {
+                    case MouseButtons.Left:
+                        return rawinput_mouse_state_previous.LeftButton;
+                    case MouseButtons.Right:
+                        return rawinput_mouse_state_previous.RightButton;
+                    case MouseButtons.Middle:
+                        return rawinput_mouse_state_previous.MiddleButton;
+                    case MouseButtons.X1:
+                        return rawinput_mouse_state_previous.XButton1;
+                    case MouseButtons.X2:
+                        return rawinput_mouse_state_previous.XButton2;
+                    case MouseButtons.ScrollUp:
+                        return rawinput_mouse_state_previous.ScrollUp;
+                    case MouseButtons.ScrollDown:
+                        return rawinput_mouse_state_previous.ScrollDown;
+                }
+            }
             return false;
         }
 

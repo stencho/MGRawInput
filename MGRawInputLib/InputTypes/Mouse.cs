@@ -13,15 +13,16 @@ namespace MGRawInputLib {
     public static class RawInputMouse {
         static RawInputMouseState mouse_state = new RawInputMouseState();
 
+        public static void reset_scroll_delta() {
+            mouse_state.ScrollDelta = 0;
+        }
+
         static Point _mouse_delta_acc;
         static void accumulate_mouse_delta(int x, int y) {
             _mouse_delta_acc += new Point(x,y);
         }
 
         internal static volatile int scroll_delta = 0;
-        static void accumulate_mouse_scroll_delta(short d) {
-            scroll_delta += d;
-        }
 
         static Point get_and_clear_mouse_delta() {
             var ret = _mouse_delta_acc;
@@ -30,6 +31,7 @@ namespace MGRawInputLib {
         }
 
         internal static void update_rawinput(RawInputTypes.RawInputMouse ri) {
+
             if (ri.Flags.HasFlag(RawMouseFlags.RELATIVE)) {
                 accumulate_mouse_delta(ri.LastX, ri.LastY);
             } 
@@ -67,23 +69,17 @@ namespace MGRawInputLib {
                         mouse_state.XButton2 = false;
                         break;
                     case RawMouseButtons.MouseWheel:
-                        scroll_delta += ri.data.ScrollDelta;
+                        mouse_state.ScrollDelta = ri.data.ScrollDelta;
                         break;
                 }
             }
+
         }
 
         public static RawInputMouseState GetState() {
-
-            if (scroll_delta != 0) {
-                mouse_state.ScrollUp = scroll_delta > 0;
-                mouse_state.ScrollDown = scroll_delta < 0;
-                scroll_delta = 0;
-            } else {
-                mouse_state.ScrollUp = false;
-                mouse_state.ScrollDown = false;
-            }
             mouse_state.Delta = get_and_clear_mouse_delta();
+            mouse_state.ScrollUp = mouse_state.ScrollDelta > 0;
+            mouse_state.ScrollDown = mouse_state.ScrollDelta < 0;
             return mouse_state.GetState();
         }
     }
@@ -92,6 +88,7 @@ namespace MGRawInputLib {
         Point Position { get; set; }
         int X => Position.X; int Y => Position.Y;
         public Point Delta { get; set; }
+        public int ScrollDelta { get; set; }
 
         public bool LeftButton { get; set; } 
         public bool MiddleButton { get; set; }
@@ -107,8 +104,16 @@ namespace MGRawInputLib {
                 Position = this.Position, Delta = this.Delta,
                 LeftButton = this.LeftButton, MiddleButton = this.MiddleButton, RightButton = this.RightButton,
                 XButton2 = this.XButton2, XButton1 = this.XButton1,
-                ScrollDown = this.ScrollDown, ScrollUp = this.ScrollUp
+                ScrollDown = this.ScrollDown, ScrollUp = this.ScrollUp, 
+                ScrollDelta = this.ScrollDelta
             };
+        }
+
+        internal string info() {
+            return $@"Mouse
+[Left] {LeftButton} [Right] {RightButton}
+[Middle] {MiddleButton} [X1] {XButton1} [X2] {XButton2}
+[ScrollUp] {ScrollUp} [ScrollDown] {ScrollDown} [ScrollDelta] {ScrollDelta}";
         }
     }
 }

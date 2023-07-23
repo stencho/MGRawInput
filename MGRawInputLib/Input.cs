@@ -85,6 +85,9 @@ namespace MGRawInputLib {
 
         public static Point mouse_delta;
 
+        static int scroll_delta_held = 0;
+
+
         public static void initialize(Game parent) {
             Input.parent = parent;
 
@@ -105,9 +108,32 @@ namespace MGRawInputLib {
 
                     ri_mouse_state = RawInputMouse.GetState();
 
+
                     mouse_delta = ri_mouse_state.Delta;
 
-                    foreach (InputHandler handler in handlers) handler.mouse_delta_accumulated += ri_mouse_state.Delta;
+                    bool hit_data = false;
+
+                    for (int i = 0; i < handlers.Count; i++) {
+                        handlers[i].mouse_delta_accumulated += ri_mouse_state.Delta;
+                        
+                        scroll_delta_held = ri_mouse_state.ScrollDelta;
+
+                        if (handlers[i].pulled_data) {
+                            handlers[i].pulled_data = false;
+                            handlers[i].scroll_delta = 0;
+                        } else {
+                            hit_data = true;
+                            handlers[i].scroll_delta = scroll_delta_held;
+                        }
+
+                    }
+
+                    if (!hit_data) {
+                        scroll_delta_held = 0;
+                        ri_mouse_state.ScrollDelta = 0;
+                        RawInputMouse.reset_scroll_delta();
+                    }
+
                 }
 
                 if (_input_method == input_method.MonoGame) {
