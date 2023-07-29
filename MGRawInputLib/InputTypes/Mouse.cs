@@ -67,7 +67,7 @@ namespace MGRawInputLib {
                         mouse_state.XButton2 = false;
                         break;
                     case RawMouseButtons.MouseWheel:
-                        mouse_state.ScrollDelta = ri.data.ScrollDelta;
+                        mouse_state.ScrollDelta += ri.data.ScrollDelta;
                         break;
                 }
             }

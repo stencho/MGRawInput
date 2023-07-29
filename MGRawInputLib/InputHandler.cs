@@ -62,12 +62,14 @@ namespace MGRawInputLib {
                 _scroll_delta_acc = value;
             }
         }
-        public void accumulate_scroll_delta(int a) {
+        internal void accumulate_scroll_delta(int a) {
             _scroll_delta_acc += a;
         }
-        public void accumulate_mouse_delta(Point p) {
+        internal void accumulate_mouse_delta(Point p) {
             _mouse_delta_acc += p;
         }
+
+
         public InputHandler() {
             Input.handlers.Add(this);
 
