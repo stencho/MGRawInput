@@ -29,6 +29,8 @@ namespace MGRawInputLib {
         public static GamePadState gamepad_three_state { get; private set; }
         public static GamePadState gamepad_four_state { get; private set; }
 
+        static bool limit_thread_rate = false;
+
         public static int frame_rate => _frame_rate;
         static int _frame_rate;
 
@@ -184,10 +186,15 @@ namespace MGRawInputLib {
                     _fps_timer -= fps_update_frequency_ms;
                 }
 
-                while (run_thread) {
+                if (limit_thread_rate) {
+                    while (run_thread) {
+                        current_dt = DateTime.Now;
+                        ts = (current_dt - start_dt);
+                        if (ts.TotalMilliseconds >= thread_ms) break;
+                    }
+                } else {
                     current_dt = DateTime.Now;
                     ts = (current_dt - start_dt);
-                    if (ts.TotalMilliseconds >= thread_ms) break;
                 }
             }
         }
