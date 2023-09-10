@@ -29,8 +29,6 @@ namespace MGRawInputLib {
         public static GamePadState gamepad_three_state { get; private set; }
         public static GamePadState gamepad_four_state { get; private set; }
 
-        static bool limit_thread_rate = false;
-
         public static int frame_rate => _frame_rate;
         static int _frame_rate;
 
@@ -39,6 +37,7 @@ namespace MGRawInputLib {
 
         public static int fps_update_frequency_ms { get; set; } = 500;
         public static int poll_hz { get; private set; } = 1000;
+        static bool limit_thread_rate = true;
 
         static double thread_ms => (1000.0 / poll_hz);
 
