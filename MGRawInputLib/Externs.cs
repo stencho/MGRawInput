@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 using Microsoft.VisualBasic;
@@ -1708,7 +1709,6 @@ namespace MGRawInputLib {
 
 
 
-
             [StructLayout(LayoutKind.Sequential)]
             public struct POINT {
                 public int X; public int Y;
@@ -1772,6 +1772,7 @@ namespace MGRawInputLib {
         public static IntPtr message_window_handle;
         public static IntPtr actual_window_handle = current_process_monogame_window_handle();
         
+
         [DllImport("kernel32.dll")] static extern int GetLastError();
         [DllImport("user32.dll", SetLastError = true)][return: MarshalAs(UnmanagedType.U2)] static extern short RegisterClassEx([In] ref WNDCLASSEX lpwcx);
         [DllImport("user32.dll")] static extern IntPtr CreateWindowEx(uint dwExStyle,
@@ -1791,8 +1792,7 @@ namespace MGRawInputLib {
         [DllImport("user32.dll")] static extern nint WindowFromPoint(System.Drawing.Point Point);
 
         public static bool window_under_cursor() {
-            System.Drawing.Point cp;
-            GetCursorPos(out cp);
+            System.Drawing.Point cp = get_cursor_pos_ms();            
             return WindowFromPoint(cp) == actual_window_handle;
         }
 
@@ -1808,9 +1808,16 @@ namespace MGRawInputLib {
             RECT rect; GetWindowRect(actual_window_handle, out rect);
             return new Microsoft.Xna.Framework.Point(rect.Size.Width, rect.Size.Height);
         }
+        static Point pms;
+        public static Point get_cursor_pos_ms() {
+            GetCursorPos(out pms);
+            return pms;
+        }
+        static Microsoft.Xna.Framework.Point pxn;
         public static Microsoft.Xna.Framework.Point get_cursor_pos() {
-            Point p; GetCursorPos(out p);
-            return new Microsoft.Xna.Framework.Point(p.X, p.Y);
+            pxn.X = pms.X;
+            pxn.Y = pms.Y; 
+            return pxn;
         }
         public static void set_cursor_pos(int x, int y) {
             SetCursorPos(x,y);
@@ -1819,8 +1826,9 @@ namespace MGRawInputLib {
             SetCursorPos(pos.X, pos.Y);
         }
         public static Microsoft.Xna.Framework.Point get_cursor_pos_relative_to_window() {
-            Point p; GetCursorPos(out p);
+            Microsoft.Xna.Framework.Point p = get_cursor_pos();
             Microsoft.Xna.Framework.Point w = get_window_pos();
+
             return new Microsoft.Xna.Framework.Point(p.X - w.X, p.Y - w.Y);
         }
 

@@ -36,7 +36,7 @@ namespace MGRawInputLib {
         static long _frame_count = 0;
 
         public static int fps_update_frequency_ms { get; set; } = 500;
-        public static int poll_hz { get; private set; } = 1000;
+        public static int poll_hz { get; private set; } = 500;
         static bool limit_thread_rate = true;
 
         static double thread_ms => (1000.0 / poll_hz);
@@ -94,14 +94,16 @@ namespace MGRawInputLib {
             control_update_thread.Start();
         }
 
+        static TimeSpan one_tick = new TimeSpan((long)250);
         static void update() {
             while (run_thread) {
                 start_dt = DateTime.Now;
 
-                cursor_pos = Externs.get_cursor_pos_relative_to_window();
-                cursor_pos_actual = Externs.get_cursor_pos();
-
                 if (_input_method == input_method.RawInput) {
+
+                    cursor_pos = Externs.get_cursor_pos_relative_to_window();
+                    cursor_pos_actual = Externs.get_cursor_pos();
+
                     ri_keyboard_state = RawInputKeyboard.GetState();
 
                     ri_mouse_state = RawInputMouse.GetState();
@@ -190,10 +192,12 @@ namespace MGRawInputLib {
                         current_dt = DateTime.Now;
                         ts = (current_dt - start_dt);
                         if (ts.TotalMilliseconds >= thread_ms) break;
+                        //else Thread.Sleep(one_tick);
                     }
                 } else {
                     current_dt = DateTime.Now;
                     ts = (current_dt - start_dt);
+                    //Thread.Sleep(one_tick);
                 }
             }
         }
