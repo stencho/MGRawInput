@@ -37,7 +37,7 @@ namespace MGRawInputLib {
 
         public static int fps_update_frequency_ms { get; set; } = 500;
         public static int poll_hz { get; private set; } = 500;
-        static bool limit_thread_rate = false;
+        static bool limit_thread_rate = true;
 
         static double thread_ms => (1000.0 / poll_hz);
 
@@ -191,6 +191,9 @@ namespace MGRawInputLib {
                     while (run_thread) {
                         current_dt = DateTime.Now;
                         ts = (current_dt - start_dt);
+
+                        //Thread.Sleep(new TimeSpan((long)(Math.Abs(ts.TotalMilliseconds - thread_ms) * 10)));
+
                         if (ts.TotalMilliseconds >= thread_ms) break;
                         //else Thread.Sleep(one_tick);
                     }
