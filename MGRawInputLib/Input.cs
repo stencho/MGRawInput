@@ -36,7 +36,7 @@ namespace MGRawInputLib {
         static long _frame_count = 0;
 
         public static int fps_update_frequency_ms { get; set; } = 500;
-        public static int poll_hz { get; private set; } = 500;
+        public static int poll_hz { get; private set; } = 5000;
         static bool limit_thread_rate = true;
 
         static double thread_ms => (1000.0 / poll_hz);
